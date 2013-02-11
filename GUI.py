@@ -30,8 +30,20 @@ class Main_window(Frame):
         choose_parameter.pack()       
         choose_parameter.place(x=10,y=10)
         
-        add_parameter = Button(self, text ="add parameter")
+        def add_click():
+            val = map(int, choose_parameter.curselection())    
+           
+        
+        add_parameter = Button(self, text ="add parameter",command = add_click)
         add_parameter.place(x=10,y= 180)
+        
+        
+        box_display = Text(self,state="disabled",height=10,width=30)
+              
+        box_display.place(x=150,y= 10)
+        
+        
+        
             
 def main():
     
