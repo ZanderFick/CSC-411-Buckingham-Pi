@@ -1,6 +1,9 @@
 import Tkinter
 from Tkinter import *
 import xlrd
+import numpy as np
+
+power_array = np.zeros([7,1])
 
 
 class Main_window(Frame):
@@ -23,7 +26,7 @@ class Main_window(Frame):
         
         choose_parameter = Listbox(self,bg="grey",selectmode="SINGLE")         
         
-        for r in range(parameter_sheet.nrows):
+        for r in range(1,parameter_sheet.nrows):
             name = parameter_sheet.cell(r,0).value
             choose_parameter.insert(END,name)
         
@@ -31,17 +34,25 @@ class Main_window(Frame):
         choose_parameter.place(x=10,y=10)
         
         def add_click():
-            val = map(int, choose_parameter.curselection())    
-           
-        
+            val = map(int, choose_parameter.curselection())[0]
+            
+            [row, col] = power_array.shape
+            
+            for c in range(2,8):   
+                power = parameter_sheet.cell(val,c).value
+                
+                
+            
+            
         add_parameter = Button(self, text ="add parameter",command = add_click)
         add_parameter.place(x=10,y= 180)
-        
         
         box_display = Text(self,state="disabled",height=10,width=30)
               
         box_display.place(x=150,y= 10)
         
+          
+            
         
         
             
