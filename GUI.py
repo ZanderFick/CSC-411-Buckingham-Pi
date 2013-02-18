@@ -20,27 +20,27 @@ class Pi_interface(wx.Frame):
         
         sizer = wx.BoxSizer(wx.VERTICAL)
  
-        Values = gridlib.Grid(panel)
-        Values.CreateGrid(11, 11)
+        self.values = gridlib.Grid(panel)
+        self.values.CreateGrid(11, 11)
         
         
         for column in range(11):
             
-            Values.SetColLabelValue(column, ColLabels[column])
-            Values.AutoSizeColumns()    
+            self.values.SetColLabelValue(column, ColLabels[column])
+            self.values.AutoSizeColumns()    
         
-        sizer.Add(Values, 1, wx.EXPAND)
+        sizer.Add(self.values, 1, wx.EXPAND)
         panel.SetSizerAndFit(sizer)  
         self.SetAutoLayout(True)
         self.SetSizer(sizer)
         
 
-        Values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,) #<---I cannot Get this to work 
+        self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,) #<---I cannot Get this to work 
         
 
          
     def OnCellChange(self, event):
-        print self.GetCellValue(event.GetRow(), event.GetCol()) #<-- so that I can simply retrieve the typed cell value
+        print self.values.GetCellValue(event.GetRow(), event.GetCol()) #<-- so that I can simply retrieve the typed cell value
         
             
 if __name__ == "__main__":
