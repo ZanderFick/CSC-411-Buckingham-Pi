@@ -5,7 +5,7 @@ except ImportError:
     raise ImportError,"wxpython module required!"
 import numpy as np
 
-input_mat = np.array([[]])
+input_mat = np.array([[0,0,0,0,0,0,0]])
 
 class Pi_interface(wx.Frame):
     def __init__(self,parent,id,title):
@@ -41,17 +41,30 @@ class Pi_interface(wx.Frame):
         
         for r in range (0,row):
             for c in range (8,col):            
-                self.values.SetReadOnly(r,c)     
+                self.values.SetReadOnly(r,c)    
                 
-         
+        
+        
+        
     def OnCellChange(self, event):
-        print  self.values.GetCellValue(event.GetRow(), event.GetCol())
+        def resize_mat(grid,array):        
+            row = grid.values.GetNumberRows()
+            [m_col, m_row] = array.shape
+            delt = row - m_row
+            
+            if delt > 0:
+                add_row = np.array([[0,0,0,0,0,0,0]])
+                for r_add in range(delt):
+                    array = np.concatenate((array,add_row))
+            if delt < 0:
+                    array = array[:+delt,:]
+            
+            
         active = event.GetRow(), event.GetCol()
         
         row = self.values.GetNumberRows()
-        [m_col, m_row] = input_mat.shape
-        delt = row - m_row
-        print delt
+       
+        resize_mat(self,input_mat)
                    # new_row = [0,0,0,0,0,0,0]
            # input_mat = input_mat.concatenate(new_row)
     
