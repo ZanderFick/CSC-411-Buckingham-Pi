@@ -4,9 +4,11 @@ try:
 except ImportError:
     raise ImportError,"wxpython module required!"
 
+import numpy as np
+
 class Pi_interface(wx.Frame):
     def __init__(self,parent,id,title):
-        wx.Frame.__init__(self,parent,id,title,size=(750,600))
+        wx.Frame.__init__(self,parent,id,title,size=(800,700))
         self.parent = parent
         self.initialize()
         
@@ -35,13 +37,19 @@ class Pi_interface(wx.Frame):
         self.SetSizer(sizer)
         
 
-        self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,) #<---I cannot Get this to work 
-        
+        self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,) 
 
+        col = self.values.GetNumberCols()
+        row = self.values.GetNumberRows()
+        
+        for r in range (0,row):
+            for c in range (8,col):            
+                self.values.SetReadOnly(r,c)
+                print r,c
+                
          
     def OnCellChange(self, event):
-        print self.values.GetCellValue(event.GetRow(), event.GetCol()) #<-- so that I can simply retrieve the typed cell value
-        
+        print self.values.GetCellValue(event.GetRow(), event.GetCol())
             
 if __name__ == "__main__":
     app = wx.App()
