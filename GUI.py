@@ -5,8 +5,6 @@ except ImportError:
     raise ImportError,"wxpython module required!"
 import numpy as np
 
-input_mat = np.array([[0,0,0,0,0,0,0]])
-
 class Pi_interface(wx.Frame):
     def __init__(self,parent,id,title):
         wx.Frame.__init__(self,parent,id,title,size=(800,700))
@@ -42,32 +40,32 @@ class Pi_interface(wx.Frame):
         for r in range (0,row):
             for c in range (8,col):            
                 self.values.SetReadOnly(r,c)    
-                
-        
-        
-        
+ 
+        self.input_mat = np.array([[0,0,0,0,0,0,0]])
+         
     def OnCellChange(self, event):
-        def resize_mat(grid,array):        
-            row = grid.values.GetNumberRows()
-            [m_col, m_row] = array.shape
-            delt = row - m_row
-            
-            if delt > 0:
-                add_row = np.array([[0,0,0,0,0,0,0]])
-                for r_add in range(delt):
-                    array = np.concatenate((array,add_row))
-            if delt < 0:
-                    array = array[:+delt,:]
-            
-            
-        active = event.GetRow(), event.GetCol()
-        
-        row = self.values.GetNumberRows()
+        row = self.values.GetNumberRows()        
        
-        resize_mat(self,input_mat)
-                   # new_row = [0,0,0,0,0,0,0]
-           # input_mat = input_mat.concatenate(new_row)
+        [m_row, m_col] = self.input_mat.shape
+        delt = row - m_row
+                
+        if delt > 0:
+            add_row = np.array([[0,0,0,0,0,0,0]])
+            for r_add in range(delt):
+                self.input_mat = np.vstack((self.input_mat,add_row))    
+        if delt < 0:
+            self.input_mat = self.input_mat[:+delt,:]
     
+        for update_col in range(1,7):
+            for update_row in range(0,row):
+                val = self.values.GetCellValue(update_row, update_col)
+                if val == '':
+                    self.input_mat[update_row,update_col] = 0
+                else:
+                    self.input_mat[update_row,update_col-1] = val 
+        self.input_mat = self.input_mat[self.input_mat.any(1)]
+        print self.input_mat
+        
         
 if __name__ == "__main__":
     app = wx.App()
