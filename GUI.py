@@ -3,6 +3,11 @@ try:
         import wx.grid as gridlib
 except ImportError:
     raise ImportError,"wxpython module required!"
+try:
+        import PI_Finder as PI
+except ImportError:
+    raise ImportError,"PI_Finder module required!"
+    
 import numpy as np
 
 class Pi_interface(wx.Frame):
@@ -63,8 +68,11 @@ class Pi_interface(wx.Frame):
                     self.input_mat[update_row,update_col] = 0
                 else:
                     self.input_mat[update_row,update_col-1] = val 
+                    
         self.input_mat = self.input_mat[self.input_mat.any(1)]
-        print self.input_mat
+        
+        A =  PI.buck(self.input_mat)
+        print A
         
         
 if __name__ == "__main__":

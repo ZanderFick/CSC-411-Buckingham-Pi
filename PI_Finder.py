@@ -29,71 +29,63 @@ from numpy import *
 #Consider the stirrer system:
     ## http://en.wikipedia.org/wiki/Dimensionless_number
 #var's (Dh,mu,roh,P,n)
-
-D_mat = np.array([[1, -1, -3, 2, 0],   #Length
-                [0, -1, 0, -3, -1],        #Time
-                [0, 1, 1, 1, 0],      #Mass                
-                [0,0,0,0,0],        #Temperature
-                [0,0,0,0,0],        #Quantity
-                [0,0,0,0,0],        #Current
-                [0,0,0,0,0]])       #Luminous intensity
-
+def buck(input_matrix):
+    D_mat = input_matrix.T
 #Delete null rows
-D_mat = D_mat[D_mat.any(1)]
+    D_mat = D_mat[D_mat.any(1)]
 
 #get matrix dimensions
-[d, k] = D_mat.shape
+    [d, k] = D_mat.shape
 
-p = k-d
-if p < 0:
-    print ""  
+    p = k-d
+    if p < 0:
+        print ""  
     #Is the handling of systems with more dimensions than variables feasable 
     #when taking into account the function of this project?
-else:
+    elif d >= 1 and k >= 1 :
 #Create righthand A-matrix and remove singularities
-    A_det = 0
+        A_det = 0
 
-    while A_det == 0:
-        A_mat = D_mat.T[p:k].T
-        A_det = np.linalg.det(A_mat)
-        A_rank = np.linalg.matrix_rank(A_mat)
-        delta = d - A_rank
+        while A_det == 0:
+            A_mat = D_mat.T[p:k].T
+            A_det = np.linalg.det(A_mat)
+            A_rank = np.linalg.matrix_rank(A_mat)
+            delta = d - A_rank
        
     
-        if delta == 0 and A_det == 0:
+            if delta == 0 and A_det == 0:
 #randomly swap two columns
-            r = random.randint(0,k-1)
-            D_mat[:,[0,1+r]] =  D_mat[:,[1+r,0]]
-            print "shuffle"
+                r = random.randint(0,k-1)
+                D_mat[:,[0,1+r]] =  D_mat[:,[1+r,0]]
         
-        elif A_det == 0 and delta <> 0:
+            elif A_det == 0 and delta <> 0:
 #remove singular rows and create new dimensional matrix
-            u,s,v = np.linalg.svd(A_mat)
-            D_mat = D_mat[s>1e-10]
-            [d, k] = D_mat.shape
-            p = k-d
-            print "del"
+                u,s,v = np.linalg.svd(A_mat)
+                D_mat = D_mat[s>1e-10]
+                [d, k] = D_mat.shape
+                p = k-d
+                
 #Create lefthand B-matrix
-    B_mat = D_mat.T[0:p].T
+      ##  B_mat = D_mat.T[0:p].T
 
 #Create the E I matrix
-    I_mat = np.identity(p)
+       ## I_mat = np.identity(p)
 
 #Create the E null patrix
 
-    null_mat = np.zeros([p,d])
+      ##  null_mat = np.zeros([p,d])
 
 #Create the -inv(A)B submatrix
 
-    A_inv = np.linalg.inv(A_mat)
+      ##  A_inv = np.linalg.inv(A_mat)
 
-    invAB_mat = dot(A_inv,B_mat)*-1
+      ##  invAB_mat = dot(A_inv,B_mat)*-1
 #Assemble the E matrix
 
-    E_mat_top = np.concatenate((I_mat,null_mat),axis = 1)
-    E_mat_bottom = np.concatenate((invAB_mat,A_inv),axis = 1)
+       ## E_mat_top = np.concatenate((I_mat,null_mat),axis = 1)
+      ##  E_mat_bottom = np.concatenate((invAB_mat,A_inv),axis = 1)
 
-    E_mat = np.concatenate((E_mat_top,E_mat_bottom),axis=0)
+      ##  E_mat = np.concatenate((E_mat_top,E_mat_bottom),axis=0)
 
 #Set up the Z matrix
 #Added advantage that other groups (not non-dimensional) can be found
@@ -102,26 +94,26 @@ else:
 
 #create the q sub matrix for the non dimensional case
 
-    q_mat = np.zeros([d,p])
+      ##  q_mat = np.zeros([d,p])
 
 #create the remaining non singular top Z sub matrix
 
-    top_mat = np.array([[2,5],
-                        [-1,0]])
+      ##  top_mat = np.array([[2,5],
+                           ## [-1,0]])
 ##The problem now arises that since the top matrix has to be
 ## arbitratily chosen,One attempt was to use a simple identity matrix
 ## with dimension p which yielded valid dimensionless groups
 ## but not those desired.
 ## fixing the coefficients as they should be yields the correct final pi groups
 #For this specific system
-    Z_mat = np.concatenate((top_mat,q_mat),axis=0)
+       ## Z_mat = np.concatenate((top_mat,q_mat),axis=0)
 
 
 #the resulting P matrix columns represent the pi groups
 
-    Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
+      ## Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
     
-    [rows,cols] = Pi_mat.shape
+       ## [rows,cols] = Pi_mat.shape
 # remove decimals
     
   #  for col in range(0,cols):
@@ -133,4 +125,4 @@ else:
        # print GCD(denom.T)
             
 
-    print Pi_mat
+    return D_mat
