@@ -29,13 +29,28 @@ from numpy import *
 #Consider the stirrer system:
     ## http://en.wikipedia.org/wiki/Dimensionless_number
 #var's (Dh,mu,roh,P,n)
+
 def buck(input_matrix):
+    [rows, cols] = input_matrix.shape   
+    
+    iszero = 1
+    for rowc in range(0,rows):   
+        row = rows - rowc - 1
+        for col in range(0,cols):
+            if input_matrix[row,col] <> 0:
+                iszero = 0
+        if iszero == 1:
+            input_matrix = np.delete(input_matrix,(row),axis=0) 
+            
+    [rows, cols] = input_matrix.shape    
+   
     D_mat = input_matrix.T
 #Delete null rows
     D_mat = D_mat[D_mat.any(1)]
 
 #get matrix dimensions
     [d, k] = D_mat.shape
+   
 
     p = k-d
     if p < 0:
@@ -64,28 +79,28 @@ def buck(input_matrix):
                 D_mat = D_mat[s>1e-10]
                 [d, k] = D_mat.shape
                 p = k-d
-                
+            #    
 #Create lefthand B-matrix
-      ##  B_mat = D_mat.T[0:p].T
+        B_mat = D_mat.T[0:p].T
 
 #Create the E I matrix
-       ## I_mat = np.identity(p)
+        I_mat = np.identity(p)
 
 #Create the E null patrix
 
-      ##  null_mat = np.zeros([p,d])
+        null_mat = np.zeros([p,d])
 
 #Create the -inv(A)B submatrix
 
-      ##  A_inv = np.linalg.inv(A_mat)
+        A_inv = np.linalg.inv(A_mat)
 
-      ##  invAB_mat = dot(A_inv,B_mat)*-1
+        invAB_mat = dot(A_inv,B_mat)*-1
 #Assemble the E matrix
 
-       ## E_mat_top = np.concatenate((I_mat,null_mat),axis = 1)
-      ##  E_mat_bottom = np.concatenate((invAB_mat,A_inv),axis = 1)
+        E_mat_top = np.concatenate((I_mat,null_mat),axis = 1)
+        E_mat_bottom = np.concatenate((invAB_mat,A_inv),axis = 1)
 
-      ##  E_mat = np.concatenate((E_mat_top,E_mat_bottom),axis=0)
+        E_mat = np.concatenate((E_mat_top,E_mat_bottom),axis=0)
 
 #Set up the Z matrix
 #Added advantage that other groups (not non-dimensional) can be found
@@ -94,26 +109,25 @@ def buck(input_matrix):
 
 #create the q sub matrix for the non dimensional case
 
-      ##  q_mat = np.zeros([d,p])
+        q_mat = np.zeros([d,p])
 
 #create the remaining non singular top Z sub matrix
 
-      ##  top_mat = np.array([[2,5],
-                           ## [-1,0]])
+        top_mat = np.identity(p)
 ##The problem now arises that since the top matrix has to be
 ## arbitratily chosen,One attempt was to use a simple identity matrix
 ## with dimension p which yielded valid dimensionless groups
 ## but not those desired.
 ## fixing the coefficients as they should be yields the correct final pi groups
 #For this specific system
-       ## Z_mat = np.concatenate((top_mat,q_mat),axis=0)
+        Z_mat = np.concatenate((top_mat,q_mat),axis=0)
 
 
 #the resulting P matrix columns represent the pi groups
 
-      ## Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
+        Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
     
-       ## [rows,cols] = Pi_mat.shape
+        #[rows,cols] = Pi_mat.shape
 # remove decimals
     
   #  for col in range(0,cols):
@@ -125,4 +139,4 @@ def buck(input_matrix):
        # print GCD(denom.T)
             
 
-    return D_mat
+        return Pi_mat

@@ -68,11 +68,9 @@ class Pi_interface(wx.Frame):
                     self.input_mat[update_row,update_col] = 0
                 else:
                     self.input_mat[update_row,update_col-1] = val 
-                    
-        self.input_mat = self.input_mat[self.input_mat.any(1)]
         
-        A =  PI.buck(self.input_mat)
-        print A
+        print PI.buck(self.input_mat)
+       
         
         
 if __name__ == "__main__":
