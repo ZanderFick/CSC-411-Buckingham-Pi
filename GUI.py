@@ -69,9 +69,23 @@ class Pi_interface(wx.Frame):
                 else:
                     self.input_mat[update_row,update_col-1] = val 
         
-        print PI.buck(self.input_mat)
+        Result = PI.buck(self.input_mat)
+        print Result
        
+        [res_rows, res_cols] = Result.shape
         
+        coldelt = res_cols-2
+        
+        ##if coldelt > 0:
+          ## self.values.InsertCols(11,coldelt) <-- this causes the program to loop
+        
+        for resR in range(0,res_rows):
+            for colR in range(0,2): 
+                    val = "%g" % round(Result[resR,colR],2)  
+                    if colR <=2: #Due to the problem in line 80
+                        self.values.SetCellValue(resR,colR+9,val)
+            
+            
         
 if __name__ == "__main__":
     app = wx.App()
