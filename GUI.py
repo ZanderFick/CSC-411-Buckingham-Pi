@@ -2,26 +2,27 @@ try:
         import wx
         import wx.grid as gridlib
 except ImportError:
-    raise ImportError,"wxpython module required!"
+    raise ImportError("wxpython module required!")
 try:
         import PI_Finder as PI
 except ImportError:
-    raise ImportError,"PI_Finder module required!"
+    raise ImportError("PI_Finder module required!")
 
 import numpy as np
 
+
 class Pi_interface(wx.Frame):
-    def __init__(self,parent,id,title):
-        wx.Frame.__init__(self,parent,id,title,size=(800,700))
+    def __init__(self, parent, id, title):
+        wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
         self.updating_columns = False
         self.initialize()
 
     def initialize(self):
 
-        panel = wx.Panel(self,-1,(10,20),style=wx.SUNKEN_BORDER)
+        panel = wx.Panel(self, -1, (10, 20), style=wx.SUNKEN_BORDER)
 
-        ColLabels = ["Name","L","T","M",u"\u03F4","N","I","J"," ","Pi1","Pi2"]
+        ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
 
         Ncols = len(ColLabels)
         Nrows = 10
@@ -45,9 +46,9 @@ class Pi_interface(wx.Frame):
 
         for r in range(Nrows):
             for c in range(8, Ncols):
-                self.values.SetReadOnly(r,c)
+                self.values.SetReadOnly(r, c)
 
-        self.input_mat = np.array([[0,0,0,0,0,0,0]])
+        self.input_mat = np.array([[0, 0, 0, 0, 0, 0, 0]])
 
     def OnCellChange(self, event):
         if self.updating_columns:
@@ -59,19 +60,19 @@ class Pi_interface(wx.Frame):
         delt = Nrows - m_row
 
         if delt > 0:
-            add_row = np.array([[0,0,0,0,0,0,0]])
+            add_row = np.array([[0, 0, 0, 0, 0, 0, 0]])
             for r_add in range(delt):
-                self.input_mat = np.vstack((self.input_mat,add_row))
+                self.input_mat = np.vstack((self.input_mat, add_row))
         if delt < 0:
-            self.input_mat = self.input_mat[:+delt,:]
+            self.input_mat = self.input_mat[:+delt, :]
 
-        for update_col in range(1,7):
-            for update_row in range(0,Nrows):
+        for update_col in range(1, 7):
+            for update_row in range(0, Nrows):
                 val = self.values.GetCellValue(update_row, update_col)
                 if val == '':
-                    self.input_mat[update_row,update_col] = 0
+                    self.input_mat[update_row, update_col] = 0
                 else:
-                    self.input_mat[update_row,update_col-1] = val
+                    self.input_mat[update_row, update_col-1] = val
 
         Result = PI.buck(self.input_mat)
         print Result
@@ -85,15 +86,13 @@ class Pi_interface(wx.Frame):
             self.values.InsertCols(11, coldelt)
             self.updating_columns = False
 
-        for resR in range(0,res_rows):
-            for colR in range(0,2):
-                    val = "%g" % round(Result[resR,colR],2)
-                    if colR <=2: #Due to the problem in line 80
-                        self.values.SetCellValue(resR,colR+9,val)
-
-
+        for resR in range(0, res_rows):
+            for colR in range(0, 2):
+                    val = "%g" % round(Result[resR, colR], 2)
+                    if colR <= 2:   # Due to the problem in line 80
+                        self.values.SetCellValue(resR, colR+9, val)
 
 if __name__ == "__main__":
     app = wx.App()
-    frame = Pi_interface(None,-1,'PI Finder GUI').Show()
+    frame = Pi_interface(None, -1, 'PI Finder GUI').Show()
     app.MainLoop()
