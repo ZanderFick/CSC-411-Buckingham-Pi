@@ -27,15 +27,9 @@ class Pi_interface(wx.Frame):
         Ncols = len(ColLabels)
         Nrows_initial = 1
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
         self.values = gridlib.Grid(panel)
         self.values.CreateGrid(Nrows_initial, Ncols)
-
-        sizer.Add(self.values, 1, wx.EXPAND)
-        panel.SetSizerAndFit(sizer)
-        # self.SetAutoLayout(True)
-        # self.SetSizer(sizer)
+        self.values.SetSize((400,300))
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
 
@@ -115,11 +109,11 @@ class Pi_interface(wx.Frame):
 
         for colup in range(0, res_cols):
             colupdate = colup + 8
-            name = 'Pi%g' % (colupdate + 1)
+            name = u'\u03A0%g' % (colup + 1)
             self.values.SetColLabelValue(colupdate, name)
             for rowupdate in range(0, Nrows):
-                colour = (215, 110, 20)
-                self.values.SetCellBackgroundColour(rowupdate, colupdate, colour)
+                col = (255, 128, 0)
+                self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
 
 if __name__ == "__main__":
     app = wx.App()
