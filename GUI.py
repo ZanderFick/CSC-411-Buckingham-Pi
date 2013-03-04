@@ -80,7 +80,9 @@ class Pi_interface(wx.Frame):
 
         for entry_row_check in range(0, Nrows):
             for add in range(1, 8):
-                self.values.SetCellValue(entry_row_check, add, '0')
+                val = self.values.GetCellValue(entry_row_check, add)
+                if val == '' or val == '0':
+                    self.values.SetCellValue(entry_row_check, add, '0')
 
         val = self.values.GetCellValue(Nrows-1, 0)
 
@@ -110,6 +112,14 @@ class Pi_interface(wx.Frame):
             for colR in range(0, res_cols):
                 val = "%g" % round(self.Result[resR, colR], 2)
                 self.values.SetCellValue(resR, colR+8, val)
+
+        for colup in range(0, res_cols):
+            colupdate = colup + 8
+            name = 'Pi%g' % (colupdate + 1)
+            self.values.SetColLabelValue(colupdate, name)
+            for rowupdate in range(0, Nrows):
+                colour = (215, 110, 20)
+                self.values.SetCellBackgroundColour(rowupdate, colupdate, colour)
 
 if __name__ == "__main__":
     app = wx.App()
