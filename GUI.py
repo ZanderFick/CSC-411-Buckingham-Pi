@@ -51,11 +51,9 @@ class Pi_interface(wx.Frame):
         self.input_mat = np.array([[0, 0, 0, 0, 0, 0, 0]])
 
     def OnCellChange(self, event):
-        Nempty_cells = 0
         if self.updating_columns:
-            Nempty_cells = 0
             return
-
+        
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
 
@@ -81,23 +79,19 @@ class Pi_interface(wx.Frame):
         print self.Result
 
         for entry_row_check in range(0, Nrows):
-            Nempty_cells = 0
+            for add in range(1, 8):
+                self.values.SetCellValue(entry_row_check, add, '0')
 
-            for addcheck in range(0, 8):
-                if self.values.GetCellValue(entry_row_check, addcheck) == '':
-                    if addcheck > 0:
-                        self.values.SetCellValue(entry_row_check, addcheck, '0')
-                        
-                    Nempty_cells += 1
-                if Nempty_cells == 8 and entry_row_check > 1:
-                    self.updating_columns = True
-                    self.values.DeleteRows(Nrows-1, 1)
-                    self.updating_columns = False
+        val = self.values.GetCellValue(Nrows-1, 0)
 
-                if Nempty_cells == 7 and entry_row_check == Nrows-1:
-                    self.updating_columns = True
-                    self.values.InsertRows(Nrows, 1)
-                    self.updating_columns = False
+        if val == '':
+            self.updating_columns = True
+            self.values.DeleteRows(Nrows-1, 1)
+            self.updating_columns = False
+        else:
+            self.updating_columns = True
+            self.values.InsertRows(Nrows, 1)
+            self.updating_columns = False
 
         [res_rows, res_cols] = self.Result.shape
         coldelt = res_cols-(Ncols-8)
