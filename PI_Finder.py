@@ -7,18 +7,24 @@ from numpy import *
 from scipy import linalg, matrix
 from numpy import *
 
-def perm_set(p):
-    d = np.zeros([1,p])
+def perm_set(a):
+    if a == 0:
+        return []
+    elif a == 1:
+        return np.array([[0],[1]])
+    elif a > 1:
+        p = a*a
+        d = np.zeros([1,p])
 
-    for c1 in range(0, p+1): 
+        for c1 in range(0, p+1): 
     
-        c2 = p-c1
-        iter_mat = concatenate((np.ones([c1]), np.zeros([c2])), 0)
+            c2 = p-c1
+            iter_mat = concatenate((np.ones([c1]), np.zeros([c2])), 0)
 
-        for z in itertools.permutations(iter_mat, p):
-            intermediate = np.asmatrix(z)
-            d = np.concatenate((d, np.asmatrix(z)), 0)
-    return DataFrame(d).drop_duplicates().values
+            for z in itertools.permutations(iter_mat, p):
+                intermediate = np.asmatrix(z)
+                d = np.concatenate((d, np.asmatrix(z)), 0)
+        return DataFrame(d).drop_duplicates().values
 
 
 def buck(input_matrix):
@@ -103,27 +109,32 @@ def buck(input_matrix):
         q_mat = np.zeros([d,p])
 
 #create the remaining non singular top Z sub matrix
+        
+        top_mat_perm =  perm_set(p)  
+        
+        [p_row, p_col] = top_mat_perm.shape     
 
-        top_mat = np.identity(p)
+# create the result matrix
+        Pi_result = np.zeros([rows,0])        
+        
+        for rescount in range(p_row):
+            top_vect = np.asmatrix(top_mat_perm[rescount])
+            if p_row > 2:
+                top_mat = np.concatenate((top_vect[0,:p],top_vect[0,-p:]),0)
 
+            else: top_mat = top_vect           
+        
 
-        Z_mat = np.concatenate((top_mat,q_mat),axis=0)
+            Z_mat = np.concatenate((top_mat,q_mat),axis=0)
 
 
 #the resulting P matrix columns represent the pi groups
 
-        Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
+            Pi_mat = around((dot(E_mat,Z_mat)),decimals = 2)
     
-        #[rows,cols] = Pi_mat.shape
-# remove decimals
-    
-  #  for col in range(0,cols):
-     #  print
-      #  denom = np.zeros([rows,1])
-        #for row in range(0,rows):
-           # entry = Pi_mat[row,col]
-            #denom[row] = Fraction(entry).limit_denominator(100).denominator
-       # print GCD(denom.T)
+            Pi_result = np.concatenate((Pi_result,Pi_mat),1)
             
+            Pi_result = Pi_result.T[Pi_result.T.any(1)].T
 
-        return Pi_mat
+
+        return Pi_result

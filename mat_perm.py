@@ -21,4 +21,4 @@ for c1 in range(0, p+1):
         d = np.concatenate((d, np.asmatrix(z)), 0)
 r = DataFrame(d).drop_duplicates().values
 
-print r
+print np.ones(0)
