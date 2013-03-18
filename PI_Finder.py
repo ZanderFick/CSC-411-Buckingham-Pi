@@ -1,34 +1,25 @@
-import fractions
 import numpy as np
-import random
+import itertools
 
+from pandas import *
+from itertools import *
+from numpy import *
 from scipy import linalg, matrix
-from fractions import Fraction
 from numpy import *
 
-#def GCD(mat):
- #   A = abs(mat)
-  #  [null , l] = A.shape
-   # print A
-   # if l >2:
-    #    GCD(A[:,:-1])
-    #elif l == 2:
-     #   [[x,y]] = A
-      #  if y ==0:
-       #     return x
-        #    print x
-        #else:
-         #   GCD(np.array([[y,np.remainder(x,y)]]))
-        
-#In this section the import from the GUI
-#takes place whereby the dimensional matrix
-#is set up and sent to this script
+def perm_set(p):
+    d = np.zeros([1,p])
 
-#For now the dimensional matrix is set up manually
+    for c1 in range(0, p+1): 
+    
+        c2 = p-c1
+        iter_mat = concatenate((np.ones([c1]), np.zeros([c2])), 0)
 
-#Consider the stirrer system:
-    ## http://en.wikipedia.org/wiki/Dimensionless_number
-#var's (Dh,mu,roh,P,n)
+        for z in itertools.permutations(iter_mat, p):
+            intermediate = np.asmatrix(z)
+            d = np.concatenate((d, np.asmatrix(z)), 0)
+    return DataFrame(d).drop_duplicates().values
+
 
 def buck(input_matrix):
     [rows, cols] = input_matrix.shape   
@@ -42,7 +33,7 @@ def buck(input_matrix):
         if iszero == 1:
             input_matrix = np.delete(input_matrix,(row),axis=0) 
             
-    [rows, cols] = input_matrix.shape    
+    [rows, cols] = input_matrix.shape       
    
     D_mat = input_matrix.T
 #Delete null rows
@@ -114,12 +105,8 @@ def buck(input_matrix):
 #create the remaining non singular top Z sub matrix
 
         top_mat = np.identity(p)
-##The problem now arises that since the top matrix has to be
-## arbitratily chosen,One attempt was to use a simple identity matrix
-## with dimension p which yielded valid dimensionless groups
-## but not those desired.
-## fixing the coefficients as they should be yields the correct final pi groups
-#For this specific system
+
+
         Z_mat = np.concatenate((top_mat,q_mat),axis=0)
 
 
