@@ -72,22 +72,18 @@ class Pi_interface(wx.Frame):
         self.Result = PI.buck(self.input_mat)
         print self.Result
 
-        for entry_row_check in range(0, Nrows):
-            for add in range(1, 8):
-                val = self.values.GetCellValue(entry_row_check, add)
-                if val == '' or val == '0':
-                    self.values.SetCellValue(entry_row_check, add, '0')
-
         val = self.values.GetCellValue(Nrows-1, 0)
 
-        if val == '':
-            self.updating_columns = True
-            self.values.DeleteRows(Nrows-1, 1)
-            self.updating_columns = False
-        else:
+        if val <> '':
             self.updating_columns = True
             self.values.InsertRows(Nrows, 1)
             self.updating_columns = False
+            
+            for entry_row_check in range(0, Nrows):
+                for add in range(1, 8):
+                    val = self.values.GetCellValue(entry_row_check, add)
+                    if val == '' or val == '0':
+                        self.values.SetCellValue(entry_row_check, add, '0')
 
         [res_rows, res_cols] = self.Result.shape
         coldelt = res_cols-(Ncols-8)
