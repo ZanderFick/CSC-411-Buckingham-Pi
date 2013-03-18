@@ -29,7 +29,7 @@ class Pi_interface(wx.Frame):
 
         self.values = gridlib.Grid(panel)
         self.values.CreateGrid(Nrows_initial, Ncols)
-        self.values.SetSize((400,300))
+        self.values.SetSize((600, 300))
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
 
@@ -47,7 +47,7 @@ class Pi_interface(wx.Frame):
     def OnCellChange(self, event):
         if self.updating_columns:
             return
-        
+
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
 
@@ -74,11 +74,11 @@ class Pi_interface(wx.Frame):
 
         val = self.values.GetCellValue(Nrows-1, 0)
 
-        if val <> '':
+        if val != '':
             self.updating_columns = True
             self.values.InsertRows(Nrows, 1)
             self.updating_columns = False
-            
+
             for entry_row_check in range(0, Nrows):
                 for add in range(1, 8):
                     val = self.values.GetCellValue(entry_row_check, add)

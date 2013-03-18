@@ -130,4 +130,4 @@ def buck(input_matrix):
 
             Pi_result = Pi_result.T[Pi_result.T.any(1)].T
 
-        return Pi_result
+        return DataFrame(Pi_result.T).drop_duplicates().values.T
