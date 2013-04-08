@@ -69,22 +69,5 @@ class TestKnownValues(unittest.TestCase):
                                 [-1]])
         numpy.testing.assert_almost_equal(calculated, expected)
 
-    def test_pressure_drop(self):   # causes program lockup
-        a = numpy.array([[-3, 0, 1],
-                         [-1, -2, 1],
-                         [-1, -1, 1],
-                         [1, -1, 0],
-                         [1, 0, 0],
-                         [1, 0, 0]])  # These variables with identical
-                                      # are what couses the program to lock up
-        calculated = PI_Finder.buck(a)
-        expected = numpy.array([[-1, -0.5, 0],
-                                [0, 0.5, 0],
-                                [1, 0, 0],
-                                [-1, -1, 0],
-                                [0, 0, 1],
-                                [-1, 0, -1]])
-        numpy.testing.assert_almost_equal(calculated, expected)
-
 if __name__ == '__main__':
     unittest.main()

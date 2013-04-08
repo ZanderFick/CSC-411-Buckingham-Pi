@@ -12,17 +12,18 @@ def perm_set(a):
     elif a == 1:
         return np.array([[0], [1]])
     elif a > 1:
-        p = a*a
-        d = np.zeros([1, p])
-
-        for c1 in range(0, p+1):
-
-            c2 = p-c1
-            iter_mat = concatenate((np.ones([c1]), np.zeros([c2])), 0)
-
-            for z in itertools.permutations(iter_mat, p):
-                d = np.concatenate((d, np.asmatrix(z)), 0)
-        return DataFrame(d).drop_duplicates().values
+        
+        d = np.zeros([a, a*a])
+        
+        for c1 in range(0,a):
+            n_ones = a + c1
+            ones_interv = np.floor(a*a/n_ones) +1
+            for c2 in range(0,a*a):
+                if np.mod(c2,ones_interv) == 0 and n_ones > 0:
+                    d[c1,c2] = 1
+                    n_ones += -1                
+        
+    return d
 
 
 def buck(input_matrix):
