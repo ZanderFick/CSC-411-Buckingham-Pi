@@ -4,7 +4,7 @@ try:
 except ImportError:
     raise ImportError("wxpython module required!")
 try:
-        import PI_Finder as PI
+        import svd_PI_finder as PI
 except ImportError:
     raise ImportError("PI_Finder module required!")
 
