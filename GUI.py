@@ -42,12 +42,13 @@ class Pi_interface(wx.Frame):
             for c in range(8, Ncols):
                 self.values.SetReadOnly(r, c)
 
-        self.input_mat = np.array([[0, 0, 0, 0, 0, 0, 0]])
+        
 
     def OnCellChange(self, event):
         if self.updating_columns:
-            return
-
+            return   
+        self.input_mat = np.array([[0, 0, 0, 0, 0, 0, 0]])
+              
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
 
@@ -70,9 +71,18 @@ class Pi_interface(wx.Frame):
                     self.input_mat[update_row, update_col-1] = val  
         if Nrows > 1:
             self.Result = PI.buck(self.input_mat[self.input_mat.any(1)])
-
+            
         val = self.values.GetCellValue(Nrows-1, 0)
-
+        
+        if Nrows > 2 :
+           val2 = self.values.GetCellValue(Nrows-2, 0) 
+           if val2 == '':
+                self.updating_columns = True
+                self.values.DeleteRows(Nrows-2)
+                self.values.DeleteRows(Nrows-1)
+                self.values.InsertRows(Nrows, 1)
+                self.updating_columns = False
+                
         if val != '':
             self.updating_columns = True
             self.values.InsertRows(Nrows, 1)
@@ -96,12 +106,12 @@ class Pi_interface(wx.Frame):
             self.updating_columns = True
             self.values.InsertCols(Ncols, coldelt)
             self.updating_columns = False
-
+            
         elif coldelt < 0:
             self.updating_columns = True
             self.values.DeleteCols(Ncols+coldelt, abs(coldelt))
             self.updating_columns = False
-
+            
         for resR in range(0, res_rows):
             for colR in range(0, res_cols):
                 val = "%g" % round(self.Result[resR, colR], 2)
