@@ -68,10 +68,8 @@ class Pi_interface(wx.Frame):
                 if val != '':
                     self.input_mat[update_col-1,update_row] = val            
         if Nrows > 1:
-            try:
-                self.Result = PI.buck(self.input_mat[self.input_mat.any(1)])
-            except:
-                self.Result = []
+            self.result_input = self.input_mat[self.input_mat.any(1)].T
+            self.Result = PI.buck(self.result_input)
         
         
         if Nrows > 2 :
@@ -93,7 +91,7 @@ class Pi_interface(wx.Frame):
                     val = self.values.GetCellValue(entry_row_check, add)
                     if val == '' or val == '0':
                         self.values.SetCellValue(entry_row_check, add, '0')
-
+            
         if self.Result != None:    
             [res_rows, res_cols] = self.Result.shape        
         else:
