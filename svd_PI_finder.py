@@ -17,21 +17,7 @@ def buck(input_matrix, eps=1e-16):
     
 # make integer
     
-    [rows, cols] = null_space.shape
-    result = numpy.zeros(null_space.shape)
-    for r in range(0,rows):
-        pi_group = numpy.array(null_space[r,:])
-        numer = numpy.zeros(pi_group.shape)
-        denom = numpy.zeros(pi_group.shape)
-        for c in range(0,cols):
-            fraction = fractions.Fraction(str(pi_group[0,c])).limit_denominator(25)
-            a = fraction.numerator
-            b = fraction.denominator
-            numer[0,c] = a
-            denom[0,c] = b
-        numer = 
-        print numer
-        print denom
+    null_space = numpy.round(null_space/numpy.ma.masked_equal(numpy.abs(null_space.T), 0).min(0).T,decimals=0)
 
     
     return null_space.T

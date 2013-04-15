@@ -12,7 +12,7 @@ class TestKnownValues(unittest.TestCase):
                          [1, 0, 0],
                          [1, 0, 0]])  
                          
-        svd_PI_finder.buck(a) 
+        print svd_PI_finder.buck(a) 
  
         
 if __name__ == '__main__':
