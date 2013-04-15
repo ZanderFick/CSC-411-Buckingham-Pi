@@ -47,42 +47,42 @@ class Pi_interface(wx.Frame):
     def OnCellChange(self, event):
         if self.updating_columns:
             return   
-        self.input_mat = np.array([[0, 0, 0, 0, 0, 0, 0]])
+        
               
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
 
-        [m_row, m_col] = self.input_mat.shape
-        delt = Nrows - m_row
+        rcount = 0
 
-        if delt > 0:
-            add_row = np.array([[0, 0, 0, 0, 0, 0, 0]])
-            for r_add in range(delt):
-                self.input_mat = np.vstack((self.input_mat, add_row))
-        if delt < 0:
-            self.input_mat = self.input_mat[:+delt, :]
+        for r in range(0,Nrows):
+            val = self.values.GetCellValue(r, 0)
+            if val != '':
+                rcount += 1
+        
+        self.input_mat = np.zeros([rcount,7]).T
+        
 
         for update_col in range(1, 7):
-            for update_row in range(0, Nrows):
+            for update_row in range(0,rcount):
                 val = self.values.GetCellValue(update_row, update_col)
-                if val == '':
-                    self.input_mat[update_row, update_col-1] = 0
-                else:
-                    self.input_mat[update_row, update_col-1] = val  
+                if val != '':
+                    self.input_mat[update_col-1,update_row] = val            
         if Nrows > 1:
-            self.Result = PI.buck(self.input_mat[self.input_mat.any(1)])
-            
-        val = self.values.GetCellValue(Nrows-1, 0)
+            try:
+                self.Result = PI.buck(self.input_mat[self.input_mat.any(1)])
+            except:
+                self.Result = []
+        
         
         if Nrows > 2 :
-           val2 = self.values.GetCellValue(Nrows-2, 0) 
-           if val2 == '':
+           val = self.values.GetCellValue(Nrows-2, 0) 
+           if val == '':
                 self.updating_columns = True
                 self.values.DeleteRows(Nrows-2)
-                self.values.DeleteRows(Nrows-1)
-                self.values.InsertRows(Nrows, 1)
                 self.updating_columns = False
                 
+        val = self.values.GetCellValue(Nrows-1, 0)    
+        
         if val != '':
             self.updating_columns = True
             self.values.InsertRows(Nrows, 1)
