@@ -17,10 +17,12 @@ class Pi_interface(wx.Frame):
         self.parent = parent
         self.updating_columns = False
         self.initialize()
+        self.Result = None
 
     def initialize(self):
 
-        panel = wx.Panel(self, -1, (10, 20), style=wx.SUNKEN_BORDER)
+        panel = wx.Panel(self, 1, (10, 20), style=wx.SUNKEN_BORDER)
+        self.Button = wx.Button(panel,-1,"Permute Pi Groups", (495,300))  
 
         ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
 
@@ -32,6 +34,7 @@ class Pi_interface(wx.Frame):
         self.values.SetSize((600, 300))
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
+        self.Button.Bind(wx.EVT_BUTTON, self.permute)
 
         for column, name in enumerate(ColLabels):
             self.values.SetColLabelValue(column, name)
@@ -41,7 +44,6 @@ class Pi_interface(wx.Frame):
         for r in range(Nrows_initial):
             for c in range(8, Ncols):
                 self.values.SetReadOnly(r, c)
-
         
 
     def OnCellChange(self, event):
@@ -122,6 +124,9 @@ class Pi_interface(wx.Frame):
             for rowupdate in range(0, Nrows):
                 col = (255, 128, 0)
                 self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
+
+    def permute(self, event):
+        print "Permute!!"
 
 if __name__ == "__main__":
     app = wx.App()
