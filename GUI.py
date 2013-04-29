@@ -238,6 +238,8 @@ class Browser(wx.Frame):
         
     def Import(self, event):
         self.path =  self.browser.GetFilePath()
+        if self.path != ''
+            self.Close
         
     def close(self, event):
         self.Close()
