@@ -7,22 +7,26 @@ try:
         import svd_PI_finder as PI
 except ImportError:
     raise ImportError("PI_Finder module required!")
+    
+from pandas import *
+from itertools import *
 
 import numpy as np
-
 
 class Pi_interface(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
         self.updating_columns = False
+        
         self.initialize()
-        self.Permute_Result = None
 
     def initialize(self):
 
         panel = wx.Panel(self, 1, (10, 20), style=wx.SUNKEN_BORDER)
-        self.Button = wx.Button(panel,-1,"Permute Pi Groups", (495,300))  
+
+        self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))  
+        self.Button_reset = wx.Button(panel,-1,"Reset All Fields",(605,152))
 
         ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
 
@@ -34,7 +38,8 @@ class Pi_interface(wx.Frame):
         self.values.SetSize((600, 300))
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
-        self.Button.Bind(wx.EVT_BUTTON, self.permute)
+        self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
+        self.Button_reset.Bind(wx.EVT_BUTTON, self.reset)
 
         for column, name in enumerate(ColLabels):
             self.values.SetColLabelValue(column, name)
@@ -71,8 +76,7 @@ class Pi_interface(wx.Frame):
                     self.input_mat[update_col-1,update_row] = val            
         if Nrows > 1:
             self.input_fixed = self.input_mat[self.input_mat.any(1)].T
-            self.Result = PI.buck(self.input_fixed)
-        
+            self.Result = PI.buck(self.input_fixed)        
         
         if Nrows > 2 :
            val = self.values.GetCellValue(Nrows-2, 0) 
@@ -94,8 +98,9 @@ class Pi_interface(wx.Frame):
                     if val == '' or val == '0':
                         self.values.SetCellValue(entry_row_check, add, '0')
             
-        if self.Result != None:    
-            [res_rows, res_cols] = self.Result.shape        
+        if self.Result != None:   
+            [res_rows, res_cols] = self.Result.shape
+            self.Permute_Result = np.matrix(np.zeros([res_rows,1]))
         else:
             res_cols = 0
             res_rows = 0
@@ -122,7 +127,7 @@ class Pi_interface(wx.Frame):
             name = u'\u03A0%g' % (colup + 1)
             self.values.SetColLabelValue(colupdate, name)
             for rowupdate in range(0, Nrows):
-                col = (255, 128, 0)
+                col = (255, 130, 0)
                 self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
 
     def permute(self, event):
@@ -133,8 +138,42 @@ class Pi_interface(wx.Frame):
                 rand = np.random.randint(-1,2)
                 new = np.matrix(self.Result[:,iter_r]).T
                 new_group += rand*new
-            print new_group
+                self.Permute_Result = np.hstack((self.Permute_Result,new_group))
+            self.Permute_Result = DataFrame(self.Permute_Result.T).drop_duplicates().values.T
+            self.Permute_Result = self.Permute_Result.T[self.Permute_Result.T.any(1)].T
+            
+            perm_shape = self.Permute_Result.shape
+            
+            Nrows = self.values.GetNumberRows()
+            Ncols = self.values.GetNumberCols()           
+            
+            delt = perm_shape[1] -  (Ncols - res_shape[1] - 8)
+            
+            if delt > 0:
+                self.updating_columns = True
+                self.values.InsertCols(Ncols, delt)
+                self.updating_columns = False 
                 
+                for colup in range(0, perm_shape[1]):
+                    colupdate = colup + 8 + res_shape[1]
+                    name = u'perm \u03A0%g' % (colup + 1 + res_shape[1])
+                    self.values.SetColLabelValue(colupdate, name)
+                    for rowupdate in range(0, Nrows):
+                        col = (70, 140, 255)
+                        self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
+                        
+    def reset(self, event):
+        Nrows = self.values.GetNumberRows()
+        Ncols = self.values.GetNumberCols()
+        self.input_mat = []
+        self.input_fixed = []
+        self.Result = []
+        if Nrows > 1 and Ncols > 8:
+            self.updating_columns = True
+            self.values.DeleteRows(0,Nrows-1)
+            self.values.DeleteCols(8,Ncols-8)
+            self.updating_columns = False
+        
 
 if __name__ == "__main__":
     app = wx.App()
