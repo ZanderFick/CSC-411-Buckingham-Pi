@@ -17,7 +17,7 @@ class Pi_interface(wx.Frame):
         self.parent = parent
         self.updating_columns = False
         self.initialize()
-        self.Result = None
+        self.Permute_Result = None
 
     def initialize(self):
 
@@ -67,11 +67,11 @@ class Pi_interface(wx.Frame):
         for update_col in range(1, 7):
             for update_row in range(0,rcount):
                 val = self.values.GetCellValue(update_row, update_col)
-                if val != '':
+                if val!= '':
                     self.input_mat[update_col-1,update_row] = val            
         if Nrows > 1:
-            self.result_input = self.input_mat[self.input_mat.any(1)].T
-            self.Result = PI.buck(self.result_input)
+            self.input_fixed = self.input_mat[self.input_mat.any(1)].T
+            self.Result = PI.buck(self.input_fixed)
         
         
         if Nrows > 2 :
@@ -126,7 +126,15 @@ class Pi_interface(wx.Frame):
                 self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
 
     def permute(self, event):
-        print "Permute!!"
+        res_shape =  self.Result.shape
+        if res_shape[1] > 1:
+            new_group = np.zeros([res_shape[0],1])
+            for iter_r in range(0,res_shape[1]):
+                rand = np.random.randint(-1,2)
+                new = np.matrix(self.Result[:,iter_r]).T
+                new_group += rand*new
+            print new_group
+                
 
 if __name__ == "__main__":
     app = wx.App()
