@@ -220,19 +220,27 @@ class Browser(wx.Frame):
         tbox = wx.BoxSizer(wx.HORIZONTAL)
         bbox = wx.BoxSizer(wx.HORIZONTAL)
         box = wx.BoxSizer(wx.VERTICAL)
-        tbox.Add(wx.GenericDirCtrl(bpanel, -1,size=(250,200),
-                                   style=wx.DIRCTRL_DIR_ONLY),1,wx.ALL,10)
-                                   
-        bbox.Add(wx.Button(bpanel, 1, 'Open'),0)
+        
+        self.browser = wx.GenericDirCtrl(bpanel, 0, size=(250,200))
+        tbox.Add(self.browser,1,wx.ALL,10)
+                                 
+        bbox.Add(wx.Button(bpanel, 1, 'Import'),0)
         bbox.Add(wx.Button(bpanel, 2, 'Close'),0)
         box.Add(tbox)
         box.Add(bbox,1,wx.LEFT,10)
+        
         bpanel.SetSizer(box)
         
-        bpanel.Bind(wx.EVT_BUTTON, self.close, id=2)
+        self.Bind(wx.EVT_BUTTON, self.Import,id = 1)
+        self.Bind(wx.EVT_BUTTON, self.close, id = 2)
         
-    def close(bpanel, event):
-        bpanel.Close()
+        self.path = ''
+        
+    def Import(self, event):
+        self.path =  self.browser.GetFilePath()
+        
+    def close(self, event):
+        self.Close()
 
 if __name__ == "__main__":
     app = wx.App()
