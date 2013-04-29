@@ -129,7 +129,10 @@ class Pi_interface(wx.Frame):
             for rowupdate in range(0, Nrows):
                 col = (255, 130, 0)
                 self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
-
+        self.updating_columns = True        
+        self.values.AutoSizeColumns() 
+        self.updating_columns = False
+        
     def permute(self, event):
         res_shape =  self.Result.shape
         if res_shape[1] > 1:
@@ -162,12 +165,22 @@ class Pi_interface(wx.Frame):
                         col = (70, 140, 255)
                         self.values.SetCellBackgroundColour(rowupdate, colupdate, col)
                         
+                        
+                for res_permR in range(0, perm_shape[0]):
+                    for col_permR in range(0, perm_shape[1]):
+                        val = "%g" % round(self.Permute_Result[res_permR, col_permR], 2)
+                        self.values.SetCellValue(res_permR, col_permR+8+res_shape[1], val)
+        self.updating_columns = True        
+        self.values.AutoSizeColumns() 
+        self.updating_columns = False
+                       
     def reset(self, event):
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
         self.input_mat = []
         self.input_fixed = []
         self.Result = []
+        self.Permute_Result = []
         if Nrows > 1 and Ncols > 8:
             self.updating_columns = True
             self.values.DeleteRows(0,Nrows-1)
