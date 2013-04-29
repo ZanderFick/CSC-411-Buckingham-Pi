@@ -27,7 +27,7 @@ class Pi_interface(wx.Frame):
         
         menu = wx.MenuBar()
         filemenu = wx.Menu()
-        fileopen = filemenu.Append(wx.ID_OPEN, '&Import', 'Import Variable Data')
+        fileimport = filemenu.Append(wx.ID_OPEN, '&Import', 'Import Variable Data')
         filesave = filemenu.Append(wx.ID_SAVE, '&Save', 'Save Variable and Pi Group Data')
         filemenu.AppendSeparator()
         filereset = filemenu.Append(wx.ID_RESET, '&Reset', 'Clear all data and reset fields')
@@ -38,7 +38,8 @@ class Pi_interface(wx.Frame):
         self.SetMenuBar(menu)        
         
         self.Bind(wx.EVT_MENU, self.reset, filereset)
-        self.Bind(wx.EVT_MENU, self.quit, filequit)         
+        self.Bind(wx.EVT_MENU, self.quit, filequit) 
+        self.Bind(wx.EVT_MENU, self.import_data, fileimport)          
         
         self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))         
         
@@ -187,6 +188,11 @@ class Pi_interface(wx.Frame):
         self.updating_columns = True        
         self.values.AutoSizeColumns() 
         self.updating_columns = False
+        
+    def import_data(self, event):
+        plotpanel = wx.Panel(self, 2, (10, 310), style=wx.RAISED_BORDER)
+        
+        Browser().Show()
                        
     def reset(self, event):
         Nrows = self.values.GetNumberRows()
@@ -206,6 +212,11 @@ class Pi_interface(wx.Frame):
             
     def quit(self, event):
         self.Close()
+
+class Browser(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, wx.GetApp().TopWindow,title='Browse for data')
+        dircontrol = wx.GenericDirCtrl(self, 2, size=(20,40), style=0)
 
 if __name__ == "__main__":
     app = wx.App()
