@@ -13,8 +13,10 @@ from itertools import *
 
 import numpy as np
 
+import csv
+
 class Pi_interface(wx.Frame):
-    Path = ''
+    Data = []
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
@@ -42,7 +44,8 @@ class Pi_interface(wx.Frame):
         self.Bind(wx.EVT_MENU, self.quit, filequit) 
         self.Bind(wx.EVT_MENU, self.import_data, fileimport)          
         
-        self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))         
+        self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))  
+        self.Button_plot = wx.Button(panel,-1,"Plot relations", (605,300)) 
         
 
         ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
@@ -56,6 +59,7 @@ class Pi_interface(wx.Frame):
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
         self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
+        self.Button_plot.Bind(wx.EVT_BUTTON, self.plot)
 
         for column, name in enumerate(ColLabels):
             self.values.SetColLabelValue(column, name)
@@ -70,7 +74,7 @@ class Pi_interface(wx.Frame):
     def OnCellChange(self, event):
         if self.updating_columns:
             return   
-        
+
               
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
@@ -192,11 +196,13 @@ class Pi_interface(wx.Frame):
         
     def import_data(self, event):
         plotpanel = wx.Panel(self, 2, (10, 310), style=wx.RAISED_BORDER)
-        
+                     
         Browser().Show()
+            
+    def plot(self, event):
+        print Pi_interface.Data
                        
     def reset(self, event):
-        print Pi_interface.Path
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
         self.input_mat = []
@@ -219,7 +225,7 @@ class Browser(Pi_interface, wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, wx.GetApp().TopWindow,title='Browse for data',size=(400,300))
         bpanel = wx.Panel(self, -1)
-        tbox = wx.BoxSizer(wx.HORIZONTAL)
+        tbox = wx.BoxSizer(wx.HORIZONTAL) 
         bbox = wx.BoxSizer(wx.HORIZONTAL)
         box = wx.BoxSizer(wx.VERTICAL)
         
@@ -240,8 +246,18 @@ class Browser(Pi_interface, wx.Frame):
         
     def Import(self, event):
         self.path =  self.browser.GetFilePath()
+        filedata = []
         if self.path != '': 
-            Pi_interface.Path = self.path
+            with open(self.path, 'rb') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';',quoting = csv.QUOTE_MINIMAL)
+                for row in reader:
+                    if filedata == []:
+                        filedata = row
+                    else:
+                        filedata = np.vstack((filedata,row))
+                        
+                Pi_interface.Data = filedata
+                    
             self.Close()
         
     def close(self, event):
