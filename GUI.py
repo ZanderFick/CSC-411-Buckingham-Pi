@@ -215,8 +215,24 @@ class Pi_interface(wx.Frame):
 
 class Browser(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self, wx.GetApp().TopWindow,title='Browse for data')
-        dircontrol = wx.GenericDirCtrl(self, 2, size=(20,40), style=0)
+        wx.Frame.__init__(self, wx.GetApp().TopWindow,title='Browse for data',size=(400,300))
+        bpanel = wx.Panel(self, -1)
+        tbox = wx.BoxSizer(wx.HORIZONTAL)
+        bbox = wx.BoxSizer(wx.HORIZONTAL)
+        box = wx.BoxSizer(wx.VERTICAL)
+        tbox.Add(wx.GenericDirCtrl(bpanel, -1,size=(250,200),
+                                   style=wx.DIRCTRL_DIR_ONLY),1,wx.ALL,10)
+                                   
+        bbox.Add(wx.Button(bpanel, 1, 'Open'),0)
+        bbox.Add(wx.Button(bpanel, 2, 'Close'),0)
+        box.Add(tbox)
+        box.Add(bbox,1,wx.LEFT,10)
+        bpanel.SetSizer(box)
+        
+        bpanel.Bind(wx.EVT_BUTTON, self.close, id=2)
+        
+    def close(bpanel, event):
+        bpanel.Close()
 
 if __name__ == "__main__":
     app = wx.App()
