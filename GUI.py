@@ -24,9 +24,24 @@ class Pi_interface(wx.Frame):
     def initialize(self):
 
         panel = wx.Panel(self, 1, (10, 20), style=wx.SUNKEN_BORDER)
-
-        self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))  
-        self.Button_reset = wx.Button(panel,-1,"Reset All Fields",(605,152))
+        
+        menu = wx.MenuBar()
+        filemenu = wx.Menu()
+        fileopen = filemenu.Append(wx.ID_OPEN, '&Import', 'Import Variable Data')
+        filesave = filemenu.Append(wx.ID_SAVE, '&Save', 'Save Variable and Pi Group Data')
+        filemenu.AppendSeparator()
+        filereset = filemenu.Append(wx.ID_RESET, '&Reset', 'Clear all data and reset fields')
+        filemenu.AppendSeparator()
+        filequit = filemenu.Append(wx.ID_EXIT, 'Quit', 'Close Pi Finder')
+        
+        menu.Append(filemenu,  '&File')
+        self.SetMenuBar(menu)        
+        
+        self.Bind(wx.EVT_MENU, self.reset, filereset)
+        self.Bind(wx.EVT_MENU, self.quit, filequit)         
+        
+        self.Button_permute = wx.Button(panel,-1,"Permute Pi Groups", (605,30))         
+        
 
         ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
 
@@ -39,7 +54,6 @@ class Pi_interface(wx.Frame):
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
         self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
-        self.Button_reset.Bind(wx.EVT_BUTTON, self.reset)
 
         for column, name in enumerate(ColLabels):
             self.values.SetColLabelValue(column, name)
@@ -181,12 +195,17 @@ class Pi_interface(wx.Frame):
         self.input_fixed = []
         self.Result = []
         self.Permute_Result = []
-        if Nrows > 1 and Ncols > 8:
+        if Nrows > 1 :
             self.updating_columns = True
             self.values.DeleteRows(0,Nrows-1)
+            self.updating_columns = False
+        if  Ncols > 8:
+            self.updating_columns = True
             self.values.DeleteCols(8,Ncols-8)
             self.updating_columns = False
-        
+            
+    def quit(self, event):
+        self.Close()
 
 if __name__ == "__main__":
     app = wx.App()
