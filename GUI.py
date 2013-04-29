@@ -14,6 +14,7 @@ from itertools import *
 import numpy as np
 
 class Pi_interface(wx.Frame):
+    Path = ''
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
@@ -195,6 +196,7 @@ class Pi_interface(wx.Frame):
         Browser().Show()
                        
     def reset(self, event):
+        print Pi_interface.Path
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
         self.input_mat = []
@@ -213,7 +215,7 @@ class Pi_interface(wx.Frame):
     def quit(self, event):
         self.Close()
 
-class Browser(wx.Frame):
+class Browser(Pi_interface, wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, wx.GetApp().TopWindow,title='Browse for data',size=(400,300))
         bpanel = wx.Panel(self, -1)
@@ -238,8 +240,9 @@ class Browser(wx.Frame):
         
     def Import(self, event):
         self.path =  self.browser.GetFilePath()
-        if self.path != ''
-            self.Close
+        if self.path != '': 
+            Pi_interface.Path = self.path
+            self.Close()
         
     def close(self, event):
         self.Close()
