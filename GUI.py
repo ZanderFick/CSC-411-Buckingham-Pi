@@ -190,18 +190,38 @@ class Pi_interface(wx.Frame):
                     for col_permR in range(0, perm_shape[1]):
                         val = "%g" % round(self.Permute_Result[res_permR, col_permR], 2)
                         self.values.SetCellValue(res_permR, col_permR+8+res_shape[1], val)
+
         self.updating_columns = True        
         self.values.AutoSizeColumns() 
         self.updating_columns = False
         
-    def import_data(self, event):
-        plotpanel = wx.Panel(self, 2, (10, 310), style=wx.RAISED_BORDER)
-                     
+    def import_data(self, event):                     
         Browser().Show()
             
     def plot(self, event):
-        print Pi_interface.Data
-                       
+        
+        Pi_interface.reset(self, event)
+        
+        datashape = Pi_interface.Data.shape
+        
+        var_name_matrix = Pi_interface.Data[0,:]
+        var_val_matrix = np.array(Pi_interface.Data[1:,:],dtype='f')
+        
+        self.updating_columns = True
+        self.values.InsertRows(0, datashape[1]-1)
+        self.updating_columns = False        
+        
+        
+        for row in range(0,datashape[1]):
+            self.values.SetCellValue(row, 0,var_name_matrix[row])  
+              
+        Pi_interface.OnCellChange(self, event)     
+        
+        
+        plotpanel = wx.Panel(self, 2, (10, 310), style=wx.RAISED_BORDER)
+                
+        
+        
     def reset(self, event):
         Nrows = self.values.GetNumberRows()
         Ncols = self.values.GetNumberCols()
