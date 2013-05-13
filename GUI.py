@@ -58,6 +58,7 @@ class Pi_interface(wx.Frame):
         self.values.SetSize((600, 300))
 
         self.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
+        self.values.Bind(gridlib.EVT_GRID_CMD_COL_MOVE, self.Move)
         self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
         self.Button_plot.Bind(wx.EVT_BUTTON, self.plot)
 
@@ -66,10 +67,13 @@ class Pi_interface(wx.Frame):
 
         self.values.AutoSizeColumns()
 
+
         for r in range(Nrows_initial):
             for c in range(8, Ncols):
                 self.values.SetReadOnly(r, c)
-
+    def Move(self, event):
+        print "move"        
+        
     def OnCellChange(self, event):
         if self.updating_columns:
             return
