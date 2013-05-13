@@ -261,7 +261,7 @@ class Browser(Pi_interface, wx.Frame):
         filedata = []
         if self.path != '':
             with open(self.path, 'rb') as csvfile:
-                reader = csv.reader(csvfile, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+                reader = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
                 for row in reader:
                     if filedata == []:
                         filedata = row
