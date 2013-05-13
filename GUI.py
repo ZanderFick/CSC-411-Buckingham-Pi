@@ -176,7 +176,7 @@ class Pi_interface(wx.Frame):
 
                 for colup in range(0, perm_shape[1]):
                     colupdate = colup + 8 + res_shape[1]
-                    name = u'perm \u03A0%g' % (colup + 1 + res_shape[1])
+                    name = u'\u03A0%g' % (colup + 1 + res_shape[1])
                     self.values.SetColLabelValue(colupdate, name)
                     for rowupdate in range(0, Nrows):
                         col = (70, 140, 255)
