@@ -19,6 +19,7 @@ import csv
 class Pi_interface(wx.Frame):
     Data = []
     var_val_matrix = []
+
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
@@ -74,8 +75,7 @@ class Pi_interface(wx.Frame):
     def OnCellChange(self, event):
         if Pi_interface.updating_columns:
             return
-        
-        
+
         Nrows = Pi_interface.values.GetNumberRows()
         Ncols = Pi_interface.values.GetNumberCols()
 
@@ -195,11 +195,9 @@ class Pi_interface(wx.Frame):
 
     def import_data(self, event):
         Browser().Show()
-        
 
     def plot(self, event):
         print ""
-        
 
     def reset(self, event):
         Nrows = Pi_interface.values.GetNumberRows()
@@ -265,14 +263,13 @@ class Browser(Pi_interface, wx.Frame):
         self.Close()
 
     def read_in(self):
+
         Pi_interface.reset(self, self.reset)
         datashape = Pi_interface.Data.shape
-        
+
         var_name_matrix = Pi_interface.Data[0, :]
         Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:8, 1:], dtype='f')
-        
-        print Pi_interface.var_val_matrix      
-        
+
         Pi_interface.updating_columns = True
         Pi_interface.values.InsertRows(0, datashape[1]-1)
         Pi_interface.updating_columns = False
@@ -281,10 +278,9 @@ class Browser(Pi_interface, wx.Frame):
             Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
             for col in range(1, datashape[0]):
                 Pi_interface.values.SetCellValue(row-1, col, '0')
-            
 
         Pi_interface.OnCellChange(self, self.OnCellChange)
-        
+
 
 class Plotwindow(Pi_interface, wx.Frame):
     def __init__(self):
@@ -292,7 +288,7 @@ class Plotwindow(Pi_interface, wx.Frame):
         plot_panel = wx.panel(self, -1)
         self.canvas = plot.PlotCanvas(plot_panel)
         self.canvas.Draw(self.createPlotGraphics())
-        
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas, 1, wx.EXPAND)
         plot_panel.SetSizer(sizer)
