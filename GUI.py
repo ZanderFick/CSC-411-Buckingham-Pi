@@ -21,6 +21,11 @@ class Pi_interface(wx.Frame):
     Data = []
     var_val_matrix = []
     Result = None
+    
+    plot_x = []
+    
+    plot_y = []
+    y_old_colour =[]
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
@@ -60,8 +65,14 @@ class Pi_interface(wx.Frame):
         Pi_interface.values = gridlib.Grid(panel)
         Pi_interface.values.CreateGrid(Nrows_initial, Ncols)
         Pi_interface.values.SetSize((600, 300))
+        
+        ##self.a = gridlib.Grid(panel)
+        ##self.a.GetCellBackgroundColour(self,row,col)
+
 
         Pi_interface.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
+        Pi_interface.values.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.checkplot)
+        
         self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
         self.Button_plot.Bind(wx.EVT_BUTTON, self.plot)
 
@@ -73,6 +84,7 @@ class Pi_interface(wx.Frame):
         for r in range(Nrows_initial):
             for c in range(8, Ncols):
                 Pi_interface.values.SetReadOnly(r, c)
+                
 
     def OnCellChange(self, event):
         if Pi_interface.updating_columns:
@@ -80,7 +92,7 @@ class Pi_interface(wx.Frame):
 
         Nrows = Pi_interface.values.GetNumberRows()
         Ncols = Pi_interface.values.GetNumberCols()
-
+        
         rcount = 0
 
         for r in range(0, Nrows):
@@ -225,6 +237,106 @@ class Pi_interface(wx.Frame):
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
         Pi_interface.updating_columns = False
+        
+    def checkplot(self, event):
+        
+        
+        row, col = event.GetRow(), event.GetCol()
+        
+        if (col > 7) or (row >= 0):
+        
+            if col > 7:
+                name = Pi_interface.values.GetColLabelValue(col)
+                self.choice = [-1 , col]
+            else:
+                name = Pi_interface.values.GetCellValue(row, 0)
+                self.choice = [row, -1]
+                
+            if not hasattr(self, "popupID1"):
+                self.popupID1 = wx.NewId()
+                self.popupID2 = wx.NewId()
+        
+            menu = wx.Menu()
+        
+            option = wx.MenuItem(menu, self.popupID1, "Choose " + name +" as X axis")
+            menu.AppendItem(option)
+            menu.Append(self.popupID2, "Choose " + name +" as Y axis")
+            
+            self.Bind(wx.EVT_MENU, self.x_select, id = self.popupID1)
+            self.Bind(wx.EVT_MENU, self.y_select, id = self.popupID2)
+        
+            self.PopupMenu(menu)
+            menu.Destroy()
+        
+    def x_select(self, event):
+        
+        if Pi_interface.plot_x != []:
+
+            if Pi_interface.plot_x[0] == -1:
+                for row in range(0,  self.dim[1]):
+                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_x[1], self.x_old_colour[row, :]) 
+            else:
+                for col in range(0,  self.dim[0]):
+                    Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, self.x_old_colour[col, :])  
+                    
+        self.dim = Pi_interface.values.GetNumberCols(), Pi_interface.values.GetNumberRows()
+            
+        Pi_interface.plot_x = self.choice
+        
+        colournew = (150, 255, 0)
+        
+        self.x_old_colour = []        
+        
+        if self.choice[0] == -1:
+            self.x_old_colour = np.zeros([ self.dim[1], 3])
+            for row in range(0,  self.dim[1]):
+                self.x_old_colour[row, :] =  Pi_interface.values.GetCellBackgroundColour(row, self.choice[1])  
+                Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)                              
+        else: 
+            self.x_old_colour = np.zeros([ self.dim[0], 3])
+            for col in range(0,  self.dim[0]):
+                self.x_old_colour[col, :] =  Pi_interface.values.GetCellBackgroundColour(self.choice[0], col)
+                Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew) 
+                
+
+        Pi_interface.updating_columns = True
+        Pi_interface.values.AutoSizeColumns()
+        Pi_interface.updating_columns = False    
+        
+
+    def y_select(self, event):
+
+        if Pi_interface.plot_y != []:
+
+            if Pi_interface.plot_y[0] == -1:
+                for row in range(0,  self.dim[1]):
+                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_y[1], self.y_old_colour[row, :]) 
+            else:
+                for col in range(0,  self.dim[0]):
+                    Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, self.y_old_colour[col, :])  
+                    
+        self.dim = Pi_interface.values.GetNumberCols(), Pi_interface.values.GetNumberRows()
+            
+        Pi_interface.plot_y = self.choice
+        
+        colournew = (0, 255, 155)
+        
+        self.y_old_colour = []        
+        
+        if self.choice[0] == -1:
+            self.y_old_colour = np.zeros([ self.dim[1], 3])
+            for row in range(0,  self.dim[1]):
+                self.y_old_colour[row, :] =  Pi_interface.values.GetCellBackgroundColour(row, self.choice[1])  
+                Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)                              
+        else: 
+            self.y_old_colour = np.zeros([ self.dim[0], 3])
+            for col in range(0,  self.dim[0]):
+                self.y_old_colour[col, :] =  Pi_interface.values.GetCellBackgroundColour(self.choice[0], col)
+                Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew) 
+                
+
+        Pi_interface.updating_columns = True
+        Pi_interface.values.AutoSizeColumns()
 
     def import_data(self, event):
         Browser().Show()
