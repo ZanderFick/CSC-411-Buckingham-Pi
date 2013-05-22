@@ -19,6 +19,7 @@ import csv
 
 class Pi_interface(wx.Frame):
     Data = []
+    
     var_val_matrix = []
     pi_val_matrix = []
     
@@ -54,10 +55,11 @@ class Pi_interface(wx.Frame):
 
         menu.Append(filemenu,  '&File')
         self.SetMenuBar(menu)
-
+       
+        self.Bind(wx.EVT_MENU, self.import_data, fileimport)
+        self.Bind(wx.EVT_MENU, self.save, filesave)
         self.Bind(wx.EVT_MENU, self.reset, filereset)
         self.Bind(wx.EVT_MENU, self.quit, filequit)
-        self.Bind(wx.EVT_MENU, self.import_data, fileimport)
 
         self.Button_permute = wx.Button(panel, -1, "Permute Pi Groups", (605, 30))
         self.Button_plot = wx.Button(panel, -1, "Plot relations", (605, 300))
@@ -70,10 +72,6 @@ class Pi_interface(wx.Frame):
         Pi_interface.values = gridlib.Grid(panel)
         Pi_interface.values.CreateGrid(Nrows_initial, Ncols)
         Pi_interface.values.SetSize((600, 300))
-        
-        ##self.a = gridlib.Grid(panel)
-        ##self.a.GetCellBackgroundColour(self,row,col)
-
 
         Pi_interface.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
         Pi_interface.values.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.checkplot)
@@ -88,8 +86,7 @@ class Pi_interface(wx.Frame):
 
         for r in range(Nrows_initial):
             for c in range(8, Ncols):
-                Pi_interface.values.SetReadOnly(r, c)
-                
+                Pi_interface.values.SetReadOnly(r, c)    
 
     def OnCellChange(self, event):
         if Pi_interface.updating_columns:
@@ -122,6 +119,7 @@ class Pi_interface(wx.Frame):
                 Pi_interface.updating_columns = True
                 Pi_interface.values.DeleteRows(Nrows-2)
                 Pi_interface.updating_columns = False
+                Pi_interface.read_only(self)
 
         val = Pi_interface.values.GetCellValue(Nrows-1, 0)
 
@@ -129,6 +127,7 @@ class Pi_interface(wx.Frame):
             Pi_interface.updating_columns = True
             Pi_interface.values.InsertRows(Nrows, 1)
             Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
 
             for entry_row_check in range(0, Nrows):
                 for add in range(1, 8):
@@ -149,11 +148,13 @@ class Pi_interface(wx.Frame):
             Pi_interface.updating_columns = True
             Pi_interface.values.InsertCols(Ncols, coldelt)
             Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
 
         elif coldelt < 0:
             Pi_interface.updating_columns = True
             Pi_interface.values.DeleteCols(Ncols+coldelt, abs(coldelt))
             Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
 
         for resR in range(0, res_rows):
             for colR in range(0, res_cols):
@@ -170,6 +171,7 @@ class Pi_interface(wx.Frame):
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
         Pi_interface.updating_columns = False
+        Pi_interface.read_only(self)
 
     def permute(self, event):
         res_shape = self.Result.shape
@@ -193,7 +195,6 @@ class Pi_interface(wx.Frame):
 
                 if neg_test < 0:
                     new_group[:] = new_group[:]/-1                
-                
                 
                 results = Ncols - 8
                 
@@ -225,6 +226,7 @@ class Pi_interface(wx.Frame):
                 Pi_interface.updating_columns = True
                 Pi_interface.values.InsertCols(Ncols, delt)
                 Pi_interface.updating_columns = False
+                Pi_interface.read_only(self)
 
                 for colup in range(0, perm_shape[1]):
                     colupdate = colup + 8 + res_shape[1]
@@ -242,6 +244,7 @@ class Pi_interface(wx.Frame):
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
         Pi_interface.updating_columns = False
+        Pi_interface.read_only(self)
         
     def checkplot(self, event):
         
@@ -279,10 +282,24 @@ class Pi_interface(wx.Frame):
 
             if Pi_interface.plot_x[0] == -1:
                 for row in range(0,  self.dim[1]):
-                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_x[1], self.x_old_colour[row, :]) 
+                    if Pi_interface.plot_x[1] <= 7:
+                        oldcolour = (255, 255, 255)
+                    elif Pi_interface.plot_x[1] > 7 and Pi_interface.plot_x[1] <= (7 + self.Result.shape[1]):
+                        oldcolour = (255, 130, 0)
+                    else:
+                        oldcolour = (70, 140, 255)                    
+                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_x[1], oldcolour) 
             else:
                 for col in range(0,  self.dim[0]):
-                    Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, self.x_old_colour[col, :])  
+                    if col <= 7:
+                        oldcolour = (255, 255, 255)
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, oldcolour) 
+                    elif col > 7 and col <= (7 + self.Result.shape[1]):
+                        oldcolour = (255, 130, 0)
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, oldcolour) 
+                    else:
+                        oldcolour = (70, 140, 255)     
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, oldcolour)  
                     
         Pi_interface.x_name = self.name
             
@@ -290,25 +307,19 @@ class Pi_interface(wx.Frame):
             
         Pi_interface.plot_x = self.choice     
         
-        colournew = (225, 255, 200)
-        
-        self.x_old_colour = []        
+        colournew = (225, 255, 200)     
         
         if self.choice[0] == -1:
-            self.x_old_colour = np.zeros([ self.dim[1], 3])
             for row in range(0,  self.dim[1]):
-                self.x_old_colour[row, :] =  Pi_interface.values.GetCellBackgroundColour(row, self.choice[1])  
                 Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)                              
         else: 
-            self.x_old_colour = np.zeros([ self.dim[0], 3])
             for col in range(0,  self.dim[0]):
-                self.x_old_colour[col, :] =  Pi_interface.values.GetCellBackgroundColour(self.choice[0], col)
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew) 
-                
 
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
-        Pi_interface.updating_columns = False    
+        Pi_interface.updating_columns = False   
+        Pi_interface.read_only(self)
         
 
     def y_select(self, event):
@@ -317,10 +328,24 @@ class Pi_interface(wx.Frame):
 
             if Pi_interface.plot_y[0] == -1:
                 for row in range(0,  self.dim[1]):
-                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_y[1], self.y_old_colour[row, :]) 
+                    if Pi_interface.plot_y[1] <= 7:
+                        oldcolour = (255, 255, 255)
+                    elif Pi_interface.plot_y[1] > 7 and Pi_interface.plot_y[1] <= (7 + self.Result.shape[1]):
+                        oldcolour = (255, 130, 0)
+                    else:
+                        oldcolour = (70, 140, 255)                    
+                    Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_y[1], oldcolour) 
             else:
                 for col in range(0,  self.dim[0]):
-                    Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, self.y_old_colour[col, :])  
+                    if col <= 7:
+                        oldcolour = (255, 255, 255)
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, oldcolour) 
+                    elif col > 7 and col <= (7 + self.Result.shape[1]):
+                        oldcolour = (255, 130, 0)
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, oldcolour) 
+                    else:
+                        oldcolour = (70, 140, 255)     
+                        Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, oldcolour)  
         
         Pi_interface.y_name = self.name
             
@@ -330,28 +355,25 @@ class Pi_interface(wx.Frame):
         
         colournew = (255, 200, 225)
         
-        self.y_old_colour = []        
-        
         if self.choice[0] == -1:
-            self.y_old_colour = np.zeros([ self.dim[1], 3])
             for row in range(0,  self.dim[1]):
-                self.y_old_colour[row, :] =  Pi_interface.values.GetCellBackgroundColour(row, self.choice[1])  
                 Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)                              
         else: 
-            self.y_old_colour = np.zeros([ self.dim[0], 3])
             for col in range(0,  self.dim[0]):
-                self.y_old_colour[col, :] =  Pi_interface.values.GetCellBackgroundColour(self.choice[0], col)
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew) 
-                
 
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
+        Pi_interface.updating_columns = False   
+        Pi_interface.read_only(self)
 
     def import_data(self, event):
         Browser().Show()
         
-        
     def plot(self, event):
+        
+        print Pi_interface.pi_val_matrix
+        print Pi_interface.var_val_matrix
         
         x_set = Pi_interface.plot_x
         y_set = Pi_interface.plot_y
@@ -373,25 +395,24 @@ class Pi_interface(wx.Frame):
   
             Plotwindow.h_label =   'Data Plot Window'    
             
-            points = np.concatenate((x_data,y_data),axis =0).T
-            
-           
-            
-                     
+            points = np.concatenate((x_data,y_data),axis =0).T   
+
             print points
-            Pi_interface.dataset = PolyLine(points, legend= 'Red Line', colour='red')
-            
+            Pi_interface.dataset = PolyMarker(points, colour='black',  marker='triangle',size = 1)
              
             Plotwindow().Show()
-
 
     def calculate_pi_vals(self):
         if self.Result != None:
             dim = self.var_val_matrix.shape
-            add = np.zeros([dim[0], self.Result.shape[1]])
+            res_cols = Pi_interface.values.GetNumberCols()-8
+            add = np.zeros([dim[0],res_cols])
             
-            for pi_iter in range(0, self.Result.shape[1]):
-                pi = self.Result[:, pi_iter]
+            for pi_iter in range(0, res_cols):
+                if pi_iter < self.Result.shape[1]:
+                    pi = self.Result[:, pi_iter]
+                else:
+                    pi = self.Permute_Result[:,  pi_iter - self.Result.shape[1]]
                 for exp_iter in  range(0, dim[0]):
                     exp = self.var_val_matrix[exp_iter]
                     
@@ -400,24 +421,52 @@ class Pi_interface(wx.Frame):
                     for val_iter in range(0, dim[1]):
                         new_val = np.round(new_val*(exp[val_iter]**pi[val_iter]), 6)
                     add[exp_iter, pi_iter] = new_val  
-                    
+                    new_val = 1
             Pi_interface.pi_val_matrix = add
 
     def reset(self, event):
+        
         Nrows = Pi_interface.values.GetNumberRows()
         Ncols = Pi_interface.values.GetNumberCols()
+        
         self.input_mat = []
         self.input_fixed = []
         self.Result = []
         self.Permute_Result = []
+        
         if Nrows > 1:
             Pi_interface.updating_columns = True
             Pi_interface.values.DeleteRows(0, Nrows-1)
             Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
         if Ncols > 8:
             Pi_interface.updating_columns = True
             Pi_interface.values.DeleteCols(8, Ncols-8)
             Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
+
+    def save(self, event):
+        Pi_interface.calculate_pi_vals(self)
+        
+        if Pi_interface.pi_val_matrix != []:
+            dim = Pi_interface.Data.shape
+            heading_group = []
+            
+            for i in range(8, Pi_interface.values.GetNumberCols()):
+                heading_group.append('Pi Group ' + str(i-7))
+            
+            combined_new_set = np.vstack((heading_group, Pi_interface.pi_val_matrix ))
+            
+            Savebrowser.WriteData = np.hstack((Pi_interface.Data, combined_new_set))
+            Savebrowser().Show()
+
+    def read_only(self):
+        Nrows = Pi_interface.values.GetNumberRows()
+        Ncols = Pi_interface.values.GetNumberCols()
+
+        for r in range(0, Nrows):
+            for c in range(8,Ncols):
+                Pi_interface.values.SetReadOnly(r, c)   
 
     def quit(self, event):
         self.Close()
@@ -463,6 +512,68 @@ class Browser(Pi_interface, wx.Frame):
                 Browser.read_in(self)
             self.Close()
 
+    def read_in(self):
+
+        Pi_interface.reset(self, self.reset)
+        datashape = Pi_interface.Data.shape
+
+        var_name_matrix = Pi_interface.Data[0, :]
+        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:8, 1:], dtype='f')
+
+        Pi_interface.updating_columns = True
+        Pi_interface.values.InsertRows(0, datashape[1]-1)
+        Pi_interface.updating_columns = False
+        Pi_interface.read_only(self)
+
+        for row in range(1, datashape[1]):
+            Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
+            for col in range(1, datashape[0]):
+                Pi_interface.values.SetCellValue(row-1, col, '0')
+
+        Pi_interface.OnCellChange(self, self.OnCellChange)
+
+    def close(self, event):
+        self.Close()
+
+class Savebrowser(Pi_interface, wx.Frame):
+    WriteData = []
+    def __init__(self):
+
+        wx.Frame.__init__(self, wx.GetApp().TopWindow, title='Save New Data', size=(400, 300))
+        bpanel = wx.Panel(self, -1)
+        tbox = wx.BoxSizer(wx.HORIZONTAL)
+        bbox = wx.BoxSizer(wx.HORIZONTAL)
+        box = wx.BoxSizer(wx.VERTICAL)
+
+        self.browser = wx.GenericDirCtrl(bpanel, 0, size=(250, 200))
+        tbox.Add(self.browser, 1, wx.ALL, 10)
+
+        bbox.Add(wx.Button(bpanel, 1, 'Save'), 0)
+        bbox.Add(wx.Button(bpanel, 2, 'Close'), 0)
+        box.Add(tbox)
+        box.Add(bbox, 1, wx.LEFT, 10)
+
+        bpanel.SetSizer(box)
+
+        self.Bind(wx.EVT_BUTTON, self.Save, id=1)
+        self.Bind(wx.EVT_BUTTON, self.close, id=2)
+
+        self.path = ''
+
+    def Save(self, event):
+        self.path = self.browser.GetFilePath()
+        try:
+            with open (self.path, 'wb') as test_file:
+            
+                writer = csv.writer(test_file, delimiter=',')
+            
+                for row in zip(*self.WriteData.T):
+                    writer.writerow(row)
+                wx.MessageBox('Saved', 'Data Save', wx.OK | wx.ICON_INFORMATION)
+                self.Close() 
+        except: 
+            wx.MessageBox('Permission Denied', 'Error', wx.OK)    
+        
     def close(self, event):
         self.Close()
 
@@ -477,6 +588,7 @@ class Browser(Pi_interface, wx.Frame):
         Pi_interface.updating_columns = True
         Pi_interface.values.InsertRows(0, datashape[1]-1)
         Pi_interface.updating_columns = False
+        Pi_interface.read_only(self)
 
         for row in range(1, datashape[1]):
             Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
@@ -495,8 +607,6 @@ class Plotwindow(Pi_interface,  wx.Frame):
         name = 'Plot of ' + Pi_interface.y_name + ' versus ' + Pi_interface.x_name
         
         sizer = wx.BoxSizer(wx.VERTICAL)
-        
-        
         
         self.canvas = PlotCanvas(panel)
         self.canvas.Draw(PlotGraphics([Pi_interface.dataset], name, Pi_interface.x_name, Pi_interface.y_name))
