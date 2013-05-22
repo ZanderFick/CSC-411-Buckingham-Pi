@@ -20,12 +20,15 @@ import csv
 class Pi_interface(wx.Frame):
     Data = []
     var_val_matrix = []
+    pi_val_matrix = []
+    
     Result = None
     
     plot_x = []
+    x_name = ''
     
     plot_y = []
-    y_old_colour =[]
+    y_name =''
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
@@ -246,10 +249,10 @@ class Pi_interface(wx.Frame):
         if (col > 7) or (row >= 0):
         
             if col > 7:
-                name = Pi_interface.values.GetColLabelValue(col)
+                self.name = Pi_interface.values.GetColLabelValue(col)
                 self.choice = [-1 , col]
             else:
-                name = Pi_interface.values.GetCellValue(row, 0)
+                self.name = Pi_interface.values.GetCellValue(row, 0)
                 self.choice = [row, -1]
                 
             if not hasattr(self, "popupID1"):
@@ -258,9 +261,9 @@ class Pi_interface(wx.Frame):
         
             menu = wx.Menu()
         
-            option = wx.MenuItem(menu, self.popupID1, "Choose " + name +" as X axis")
+            option = wx.MenuItem(menu, self.popupID1, "Choose " + self.name +" as X axis")
             menu.AppendItem(option)
-            menu.Append(self.popupID2, "Choose " + name +" as Y axis")
+            menu.Append(self.popupID2, "Choose " + self.name +" as Y axis")
             
             self.Bind(wx.EVT_MENU, self.x_select, id = self.popupID1)
             self.Bind(wx.EVT_MENU, self.y_select, id = self.popupID2)
@@ -279,11 +282,13 @@ class Pi_interface(wx.Frame):
                 for col in range(0,  self.dim[0]):
                     Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_x[0], col, self.x_old_colour[col, :])  
                     
+        Pi_interface.x_name = self.name
+            
         self.dim = Pi_interface.values.GetNumberCols(), Pi_interface.values.GetNumberRows()
             
-        Pi_interface.plot_x = self.choice
+        Pi_interface.plot_x = self.choice     
         
-        colournew = (150, 255, 0)
+        colournew = (225, 255, 200)
         
         self.x_old_colour = []        
         
@@ -314,12 +319,14 @@ class Pi_interface(wx.Frame):
             else:
                 for col in range(0,  self.dim[0]):
                     Pi_interface.values.SetCellBackgroundColour(Pi_interface.plot_y[0], col, self.y_old_colour[col, :])  
-                    
+        
+        Pi_interface.y_name = self.name
+            
         self.dim = Pi_interface.values.GetNumberCols(), Pi_interface.values.GetNumberRows()
             
         Pi_interface.plot_y = self.choice
         
-        colournew = (0, 255, 155)
+        colournew = (255, 200, 225)
         
         self.y_old_colour = []        
         
@@ -341,9 +348,31 @@ class Pi_interface(wx.Frame):
     def import_data(self, event):
         Browser().Show()
         
+        
     def plot(self, event):
+        
+        x_set = Pi_interface.plot_x
+        y_set = Pi_interface.plot_y
+        
         Pi_interface.calculate_pi_vals(self)
-        Plotwindow().Show()
+        if x_set and y_set:
+            if x_set[0] == -1:
+                pi_pos = x_set[1] - 8
+                x_data = Pi_interface.pi_val_matrix[:, pi_pos]
+            else:
+                x_data = Pi_interface.var_val_matrix[:, x_set[0]]
+                
+            if y_set[0] == -1:
+                pi_pos = y_set[1] - 8
+                y_data = Pi_interface.pi_val_matrix[:, pi_pos]
+            else:
+                y_data = Pi_interface.var_val_matrix[:, y_set[0]]            
+
+        
+            Plotwindow.h_label =   'Plot of ' + Pi_interface.y_name + ' versus ' + Pi_interface.x_name    
+        
+            Plotwindow().Show()
+
 
     def calculate_pi_vals(self):
         if self.Result != None:
@@ -359,7 +388,9 @@ class Pi_interface(wx.Frame):
                     
                     for val_iter in range(0, dim[1]):
                         new_val = np.round(new_val*(exp[val_iter]**pi[val_iter]), 6)
-                    add[exp_iter, pi_iter] = new_val    
+                    add[exp_iter, pi_iter] = new_val  
+                    
+            Pi_interface.pi_val_matrix = add
 
     def reset(self, event):
         Nrows = Pi_interface.values.GetNumberRows()
@@ -444,9 +475,9 @@ class Browser(Pi_interface, wx.Frame):
         Pi_interface.OnCellChange(self, self.OnCellChange)
 
 class Plotwindow(Pi_interface,  wx.Frame):
- 
+    h_label = ''
     def __init__(self):
-        wx.Frame.__init__(self, None, wx.ID_ANY,'Plotting File Data')
+        wx.Frame.__init__(self, None, wx.ID_ANY,Plotwindow.h_label)
         
         panel = wx.Panel(self, wx.ID_ANY)
         
