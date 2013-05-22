@@ -30,6 +30,8 @@ class Pi_interface(wx.Frame):
     plot_y = []
     y_name =''
 
+    dataset = []
+
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
@@ -355,22 +357,31 @@ class Pi_interface(wx.Frame):
         y_set = Pi_interface.plot_y
         
         Pi_interface.calculate_pi_vals(self)
+        
         if x_set and y_set:
             if x_set[0] == -1:
                 pi_pos = x_set[1] - 8
-                x_data = Pi_interface.pi_val_matrix[:, pi_pos]
+                x_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
             else:
-                x_data = Pi_interface.var_val_matrix[:, x_set[0]]
+                x_data = np.matrix(Pi_interface.var_val_matrix[:, x_set[0]])
                 
             if y_set[0] == -1:
                 pi_pos = y_set[1] - 8
-                y_data = Pi_interface.pi_val_matrix[:, pi_pos]
+                y_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
             else:
-                y_data = Pi_interface.var_val_matrix[:, y_set[0]]            
-
-        
-            Plotwindow.h_label =   'Plot of ' + Pi_interface.y_name + ' versus ' + Pi_interface.x_name    
-        
+                y_data = np.matrix(Pi_interface.var_val_matrix[:, y_set[0]])         
+  
+            Plotwindow.h_label =   'Data Plot Window'    
+            
+            points = np.concatenate((x_data,y_data),axis =0).T
+            
+           
+            
+                     
+            print points
+            Pi_interface.dataset = PolyLine(points, legend= 'Red Line', colour='red')
+            
+             
             Plotwindow().Show()
 
 
@@ -481,19 +492,18 @@ class Plotwindow(Pi_interface,  wx.Frame):
         
         panel = wx.Panel(self, wx.ID_ANY)
         
-        
+        name = 'Plot of ' + Pi_interface.y_name + ' versus ' + Pi_interface.x_name
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
         
         
         self.canvas = PlotCanvas(panel)
+        self.canvas.Draw(PlotGraphics([Pi_interface.dataset], name, Pi_interface.x_name, Pi_interface.y_name))
 
         sizer.Add(self.canvas, 1, wx.EXPAND)
         
         panel.SetSizer(sizer)
-        
-
 
 if __name__ == "__main__":
     app = wx.App()
