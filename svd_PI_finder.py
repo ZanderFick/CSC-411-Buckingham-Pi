@@ -25,7 +25,8 @@ def buck(input_matrix, eps=1e-14):
             for c in range(numpy.size(null_space[r, :])):
                 if null_space[r, c] != 0:
                     neg_test += null_space[r, c]/numpy.abs(null_space[r, c])
-
+                if null_space[r, c] == -0:
+                    null_space[r, c] = 0    
             if neg_test < 0:
                 null_space[r, :] = null_space[r, :]/-1
 

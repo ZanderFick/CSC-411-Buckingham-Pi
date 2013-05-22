@@ -154,21 +154,52 @@ class Pi_interface(wx.Frame):
 
     def permute(self, event):
         res_shape = self.Result.shape
+        perm_shape = self.Permute_Result.shape
+        
+        Nrows = Pi_interface.values.GetNumberRows()
+        Ncols = Pi_interface.values.GetNumberCols()
+
         if res_shape[1] > 1:
             new_group = np.zeros([res_shape[0], 1])
             for iter_r in range(0, res_shape[1]):
                 rand = np.random.randint(-1, 2)
                 new = np.matrix(self.Result[:, iter_r]).T
                 new_group += rand*new
-                self.Permute_Result = np.hstack((self.Permute_Result, new_group))
-            self.Permute_Result = DataFrame(self.Permute_Result.T).drop_duplicates().values.T
-            self.Permute_Result = self.Permute_Result.T[self.Permute_Result.T.any(1)].T
+                
+                neg_test = 0
+                
+                for count in range(0, res_shape[0]):
+                    if new_group[count] != 0:
+                        neg_test += new_group[count]/np.abs(new_group[count])
+
+                if neg_test < 0:
+                    new_group[:] = new_group[:]/-1                
+                
+                
+                results = Ncols - 8
+                
+                uniqueness = np.zeros([results, 1])
+                
+                for check_entry in range(0, results):                
+                    if check_entry < res_shape[1]:
+                        compare = self.Result[:,check_entry]
+                    elif check_entry >= res_shape[1]:
+                        compare = self.Permute_Result[:, check_entry - res_shape[1]]
+                    for check_vals in range(0, res_shape[0]):
+                    
+                        abs_val = np.abs(new_group[check_vals,0])
+                        abs_check = np.abs(compare[check_vals])
+                        
+                        if abs_val != abs_check:
+                            uniqueness[check_entry] = 1
+                            
+                if (np.sum(uniqueness) - results) ==  0:
+                    self.Permute_Result = np.hstack((self.Permute_Result, new_group))
+                    self.Permute_Result = DataFrame(self.Permute_Result.T).drop_duplicates().values.T
+                    self.Permute_Result = self.Permute_Result.T[self.Permute_Result.T.any(1)].T
 
             perm_shape = self.Permute_Result.shape
-
-            Nrows = Pi_interface.values.GetNumberRows()
-            Ncols = Pi_interface.values.GetNumberCols()
-
+            
             delt = perm_shape[1] - (Ncols - res_shape[1] - 8)
 
             if delt > 0:
@@ -195,6 +226,9 @@ class Pi_interface(wx.Frame):
 
     def import_data(self, event):
         Browser().Show()
+        
+    def calculate_pi_vals(self):
+        print ""
 
     def plot(self, event):
         print ""
@@ -280,7 +314,6 @@ class Browser(Pi_interface, wx.Frame):
                 Pi_interface.values.SetCellValue(row-1, col, '0')
 
         Pi_interface.OnCellChange(self, self.OnCellChange)
-
 
 class Plotwindow(Pi_interface, wx.Frame):
     def __init__(self):
