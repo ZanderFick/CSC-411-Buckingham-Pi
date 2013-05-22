@@ -286,6 +286,7 @@ class Pi_interface(wx.Frame):
         if Pi_interface.plot_x != []:
 
             if Pi_interface.plot_x[0] == -1:
+                Pi_interface.values.SetColLabelValue(Pi_interface.plot_x[1], self.labelplaceholder_x)
                 for row in range(0,  self.dim[1]):
                     if Pi_interface.plot_x[1] <= 7:
                         oldcolour = (255, 255, 255)
@@ -295,6 +296,7 @@ class Pi_interface(wx.Frame):
                         oldcolour = (70, 140, 255)
                     Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_x[1], oldcolour)
             else:
+                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_x[0], self.labelplaceholder_x)
                 for col in range(0,  self.dim[0]):
                     if col <= 7:
                         oldcolour = (255, 255, 255)
@@ -315,9 +317,13 @@ class Pi_interface(wx.Frame):
         colournew = (225, 255, 200)
 
         if self.choice[0] == -1:
+            self.labelplaceholder_x = Pi_interface.values.GetColLabelValue(self.choice[1])
+            Pi_interface.values.SetColLabelValue(self.choice[1], 'X')
             for row in range(0,  self.dim[1]):
                 Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)
         else:
+            self.labelplaceholder_x = Pi_interface.values.GetRowLabelValue(self.choice[0])
+            Pi_interface.values.SetRowLabelValue(self.choice[0], 'X')
             for col in range(0,  self.dim[0]):
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew)
 
@@ -331,6 +337,7 @@ class Pi_interface(wx.Frame):
         if Pi_interface.plot_y != []:
 
             if Pi_interface.plot_y[0] == -1:
+                Pi_interface.values.SetColLabelValue(Pi_interface.plot_y[1], self.labelplaceholder_y)
                 for row in range(0,  self.dim[1]):
                     if Pi_interface.plot_y[1] <= 7:
                         oldcolour = (255, 255, 255)
@@ -340,6 +347,7 @@ class Pi_interface(wx.Frame):
                         oldcolour = (70, 140, 255)
                     Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_y[1], oldcolour)
             else:
+                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_y[0], self.labelplaceholder_y)
                 for col in range(0,  self.dim[0]):
                     if col <= 7:
                         oldcolour = (255, 255, 255)
@@ -360,9 +368,13 @@ class Pi_interface(wx.Frame):
         colournew = (255, 200, 225)
 
         if self.choice[0] == -1:
+            self.labelplaceholder_y = Pi_interface.values.GetColLabelValue(self.choice[1])
+            Pi_interface.values.SetColLabelValue(self.choice[1], 'Y')
             for row in range(0,  self.dim[1]):
-                Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)                     
+                Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)
         else:
+            self.labelplaceholder_y = Pi_interface.values.GetRowLabelValue(self.choice[0])
+            Pi_interface.values.SetRowLabelValue(self.choice[0], 'Y')
             for col in range(0,  self.dim[0]):
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew)
 
@@ -421,9 +433,10 @@ class Pi_interface(wx.Frame):
                     new_val = 1
 
                     for val_iter in range(0, dim[1]):
-                        new_val = np.round(new_val*(exp[val_iter]**pi[val_iter]), 6)
+                        if exp[val_iter] != 0  or pi[val_iter] != -1 :
+                            new_val = np.round(new_val*((np.abs(exp[val_iter]))**pi[val_iter]), 6)
                     add[exp_iter, pi_iter] = new_val
-                    new_val = 1
+
             Pi_interface.pi_val_matrix = add
 
     def reset(self, event):
@@ -519,7 +532,7 @@ class Browser(Pi_interface, wx.Frame):
         datashape = Pi_interface.Data.shape
 
         var_name_matrix = Pi_interface.Data[0, :]
-        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:8, 1:], dtype='f')
+        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:, 1:8], dtype='f')
 
         Pi_interface.updating_columns = True
         Pi_interface.values.InsertRows(0, datashape[1]-1)
@@ -528,7 +541,7 @@ class Browser(Pi_interface, wx.Frame):
 
         for row in range(1, datashape[1]):
             Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
-            for col in range(1, datashape[0]):
+            for col in range(1, 8):
                 Pi_interface.values.SetCellValue(row-1, col, '0')
 
         Pi_interface.OnCellChange(self, self.OnCellChange)
