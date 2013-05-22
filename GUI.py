@@ -2,6 +2,7 @@ try:
         import wx
         import wx.grid as gridlib
         import wx.lib.plot as plot
+        from wx.lib.plot import PlotCanvas, PlotGraphics, PolyLine, PolyMarker
 except ImportError:
     raise ImportError("wxpython module required!")
 try:
@@ -19,6 +20,7 @@ import csv
 class Pi_interface(wx.Frame):
     Data = []
     var_val_matrix = []
+    Result = None
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
@@ -227,11 +229,25 @@ class Pi_interface(wx.Frame):
     def import_data(self, event):
         Browser().Show()
         
-    def calculate_pi_vals(self):
-        print ""
-
     def plot(self, event):
-        print ""
+        Pi_interface.calculate_pi_vals(self)
+        Plotwindow().Show()
+
+    def calculate_pi_vals(self):
+        if self.Result != None:
+            dim = self.var_val_matrix.shape
+            add = np.zeros([dim[0], self.Result.shape[1]])
+            
+            for pi_iter in range(0, self.Result.shape[1]):
+                pi = self.Result[:, pi_iter]
+                for exp_iter in  range(0, dim[0]):
+                    exp = self.var_val_matrix[exp_iter]
+                    
+                    new_val = 1
+                    
+                    for val_iter in range(0, dim[1]):
+                        new_val = np.round(new_val*(exp[val_iter]**pi[val_iter]), 6)
+                    add[exp_iter, pi_iter] = new_val    
 
     def reset(self, event):
         Nrows = Pi_interface.values.GetNumberRows()
@@ -315,16 +331,25 @@ class Browser(Pi_interface, wx.Frame):
 
         Pi_interface.OnCellChange(self, self.OnCellChange)
 
-class Plotwindow(Pi_interface, wx.Frame):
+class Plotwindow(Pi_interface,  wx.Frame):
+ 
     def __init__(self):
-        wx.Frame.__init__(self, wx.GetApp().TopWindow, title='Browse for data', size=(400, 300))
-        plot_panel = wx.panel(self, -1)
-        self.canvas = plot.PlotCanvas(plot_panel)
-        self.canvas.Draw(self.createPlotGraphics())
-
+        wx.Frame.__init__(self, None, wx.ID_ANY,'Plotting File Data')
+        
+        panel = wx.Panel(self, wx.ID_ANY)
+        
+        
+        
         sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        
+        
+        self.canvas = PlotCanvas(panel)
+
         sizer.Add(self.canvas, 1, wx.EXPAND)
-        plot_panel.SetSizer(sizer)
+        
+        panel.SetSizer(sizer)
+        
 
 
 if __name__ == "__main__":
