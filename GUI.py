@@ -174,6 +174,7 @@ class Pi_interface(wx.Frame):
         Pi_interface.read_only(self)
 
     def permute(self, event):
+       
         res_shape = self.Result.shape
         perm_shape = self.Permute_Result.shape
         
@@ -182,42 +183,49 @@ class Pi_interface(wx.Frame):
 
         if res_shape[1] > 1:
             new_group = np.zeros([res_shape[0], 1])
-            for iter_r in range(0, res_shape[1]):
-                rand = np.random.randint(-1, 2)
-                new = np.matrix(self.Result[:, iter_r]).T
-                new_group += rand*new
+            New_Group_found = False
+            Wait = 1000
+            while not New_Group_found and Wait > 0: 
+                for iter_r in range(0, res_shape[1]):
+                    rand = np.random.randint(-1, 1)
+                    new = np.matrix(self.Result[:, iter_r]).T
+                    new_group += rand*new
                 
-                neg_test = 0
+                    neg_test = 0
                 
-                for count in range(0, res_shape[0]):
-                    if new_group[count] != 0:
-                        neg_test += new_group[count]/np.abs(new_group[count])
+                    for count in range(0, res_shape[0]):
+                        if new_group[count] != 0:
+                            neg_test += new_group[count]/np.abs(new_group[count])
+                        if new_group[count] == -0:
+                            new_group[count] = 0
 
-                if neg_test < 0:
-                    new_group[:] = new_group[:]/-1                
+                    if neg_test < 0:
+                        new_group[new_group.any(1)] = new_group[new_group.any(1)]/-1                
                 
-                results = Ncols - 8
+                    results = Ncols - 8
                 
-                uniqueness = np.zeros([results, 1])
+                    uniqueness = np.zeros([results, 1])
                 
-                for check_entry in range(0, results):                
-                    if check_entry < res_shape[1]:
-                        compare = self.Result[:,check_entry]
-                    elif check_entry >= res_shape[1]:
-                        compare = self.Permute_Result[:, check_entry - res_shape[1]]
-                    for check_vals in range(0, res_shape[0]):
+                    for check_entry in range(0, results):                
+                        if check_entry < res_shape[1]:
+                            compare = self.Result[:,check_entry]
+                        elif check_entry >= res_shape[1]:
+                            compare = self.Permute_Result[:, check_entry - res_shape[1]]
+                        for check_vals in range(0, res_shape[0]):
                     
-                        abs_val = np.abs(new_group[check_vals,0])
-                        abs_check = np.abs(compare[check_vals])
+                            abs_val = np.abs(new_group[check_vals,0])
+                            abs_check = np.abs(compare[check_vals])
                         
-                        if abs_val != abs_check:
-                            uniqueness[check_entry] = 1
+                            if abs_val != abs_check:
+                                uniqueness[check_entry] = 1
                             
-                if (np.sum(uniqueness) - results) ==  0:
-                    self.Permute_Result = np.hstack((self.Permute_Result, new_group))
-                    self.Permute_Result = DataFrame(self.Permute_Result.T).drop_duplicates().values.T
-                    self.Permute_Result = self.Permute_Result.T[self.Permute_Result.T.any(1)].T
-
+                    if (np.sum(uniqueness) - results) ==  0:
+                        New_Group_found = True
+                        self.Permute_Result = np.hstack((self.Permute_Result, new_group))
+                        self.Permute_Result = DataFrame(self.Permute_Result.T).drop_duplicates().values.T
+                        self.Permute_Result = self.Permute_Result.T[self.Permute_Result.T.any(1)].T
+                    Wait += -1
+                    
             perm_shape = self.Permute_Result.shape
             
             delt = perm_shape[1] - (Ncols - res_shape[1] - 8)
@@ -372,35 +380,33 @@ class Pi_interface(wx.Frame):
         
     def plot(self, event):
         
-        print Pi_interface.pi_val_matrix
-        print Pi_interface.var_val_matrix
+        if Pi_interface.Data != []:
         
-        x_set = Pi_interface.plot_x
-        y_set = Pi_interface.plot_y
+            x_set = Pi_interface.plot_x
+            y_set = Pi_interface.plot_y
         
-        Pi_interface.calculate_pi_vals(self)
+            Pi_interface.calculate_pi_vals(self)
         
-        if x_set and y_set:
-            if x_set[0] == -1:
-                pi_pos = x_set[1] - 8
-                x_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
-            else:
-                x_data = np.matrix(Pi_interface.var_val_matrix[:, x_set[0]])
+            if x_set and y_set:
+                if x_set[0] == -1:
+                    pi_pos = x_set[1] - 8
+                    x_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
+                else:
+                    x_data = np.matrix(Pi_interface.var_val_matrix[:, x_set[0]])
                 
-            if y_set[0] == -1:
-                pi_pos = y_set[1] - 8
-                y_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
-            else:
-                y_data = np.matrix(Pi_interface.var_val_matrix[:, y_set[0]])         
+                if y_set[0] == -1:
+                    pi_pos = y_set[1] - 8
+                    y_data = np.matrix(Pi_interface.pi_val_matrix[:, pi_pos])
+                else:
+                    y_data = np.matrix(Pi_interface.var_val_matrix[:, y_set[0]])         
   
-            Plotwindow.h_label =   'Data Plot Window'    
+                Plotwindow.h_label =   'Data Plot Window'    
             
-            points = np.concatenate((x_data,y_data),axis =0).T   
+                points = np.concatenate((x_data,y_data),axis =0).T   
 
-            print points
-            Pi_interface.dataset = PolyMarker(points, colour='black',  marker='triangle',size = 1)
+                Pi_interface.dataset = PolyMarker(points, colour='black',  marker='triangle',size = 1)
              
-            Plotwindow().Show()
+                Plotwindow().Show()
 
     def calculate_pi_vals(self):
         if self.Result != None:
