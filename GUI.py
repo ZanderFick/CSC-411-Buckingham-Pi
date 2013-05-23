@@ -24,6 +24,8 @@ class Pi_interface(wx.Frame):
 
     Result = None
 
+    Filepath = ''
+
     plot_x = []
     x_name = ''
 
@@ -384,7 +386,25 @@ class Pi_interface(wx.Frame):
         Pi_interface.read_only(self)
 
     def import_data(self, event):
-        Browser().Show()
+
+        dialog =wx.FileDialog(self, message='Select file to import', defaultFile='', style=wx.OPEN | wx.CHANGE_DIR)
+        if dialog.ShowModal() == wx.ID_OK:
+            Pi_interface.Filepath = dialog.GetPath()
+        dialog.Destroy()
+
+        self.path = Pi_interface.Filepath
+        filedata = []
+        if self.path != '':
+            with open(self.path, 'rb') as csvfile:
+                reader = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+                for row in reader:
+                    if filedata == []:
+                        filedata = row
+                    else:
+                        filedata = np.vstack((filedata, row))
+
+                Pi_interface.Data = filedata
+                Pi_interface.read_in(self) 
 
     def plot(self, event):
 
@@ -431,7 +451,6 @@ class Pi_interface(wx.Frame):
                     exp = self.var_val_matrix[exp_iter]
 
                     new_val = 1
-
                     for val_iter in range(0, dim[1]):
                         if exp[val_iter] != 0  or pi[val_iter] != -1 :
                             new_val = np.round(new_val*((np.abs(exp[val_iter]))**pi[val_iter]), 6)
@@ -460,20 +479,6 @@ class Pi_interface(wx.Frame):
             Pi_interface.updating_columns = False
             Pi_interface.read_only(self)
 
-    def save(self, event):
-        Pi_interface.calculate_pi_vals(self)
-
-        if Pi_interface.pi_val_matrix != []:
-            heading_group = []
-
-            for i in range(8, Pi_interface.values.GetNumberCols()):
-                heading_group.append('Pi Group ' + str(i-7))
-
-            combined_new_set = np.vstack((heading_group, Pi_interface.pi_val_matrix))
-
-            Savebrowser.WriteData = np.hstack((Pi_interface.Data, combined_new_set))
-            Savebrowser().Show()
-
     def read_only(self):
         Nrows = Pi_interface.values.GetNumberRows()
         Ncols = Pi_interface.values.GetNumberCols()
@@ -486,133 +491,68 @@ class Pi_interface(wx.Frame):
         self.Close()
 
 
-class Browser(Pi_interface, wx.Frame):
-    def __init__(self):
-
-        wx.Frame.__init__(self, wx.GetApp().TopWindow, title='Browse for data', size=(400, 300))
-        bpanel = wx.Panel(self, -1)
-        tbox = wx.BoxSizer(wx.HORIZONTAL)
-        bbox = wx.BoxSizer(wx.HORIZONTAL)
-        box = wx.BoxSizer(wx.VERTICAL)
-
-        self.browser = wx.GenericDirCtrl(bpanel, 0, size=(250, 200))
-        tbox.Add(self.browser, 1, wx.ALL, 10)
-
-        bbox.Add(wx.Button(bpanel, 1, 'Import'), 0)
-        bbox.Add(wx.Button(bpanel, 2, 'Close'), 0)
-        box.Add(tbox)
-        box.Add(bbox, 1, wx.LEFT, 10)
-
-        bpanel.SetSizer(box)
-
-        self.Bind(wx.EVT_BUTTON, self.Import, id=1)
-        self.Bind(wx.EVT_BUTTON, self.close, id=2)
-
-        self.path = ''
-
-    def Import(self, event):
-        self.path = self.browser.GetFilePath()
-        filedata = []
-        if self.path != '':
-            with open(self.path, 'rb') as csvfile:
-                reader = csv.reader(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-                for row in reader:
-                    if filedata == []:
-                        filedata = row
-                    else:
-                        filedata = np.vstack((filedata, row))
-
-                Pi_interface.Data = filedata
-                Browser.read_in(self)
-            self.Close()
-
     def read_in(self):
 
         Pi_interface.reset(self, self.reset)
         datashape = Pi_interface.Data.shape
 
         var_name_matrix = Pi_interface.Data[0, :]
-        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:, 1:8], dtype='f')
+
+        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1::, :], dtype='f')
+
 
         Pi_interface.updating_columns = True
-        Pi_interface.values.InsertRows(0, datashape[1]-1)
+        Pi_interface.values.InsertRows(0, datashape[1])
         Pi_interface.updating_columns = False
         Pi_interface.read_only(self)
 
-        for row in range(1, datashape[1]):
-            Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
+        for row in range(0, datashape[1]):
+            Pi_interface.values.SetCellValue(row, 0, var_name_matrix[row])
             for col in range(1, 8):
-                Pi_interface.values.SetCellValue(row-1, col, '0')
+                Pi_interface.values.SetCellValue(row, col, '0')
 
         Pi_interface.OnCellChange(self, self.OnCellChange)
 
-    def close(self, event):
-        self.Close()
 
-
-class Savebrowser(Pi_interface, wx.Frame):
-    WriteData = []
-
-    def __init__(self):
-
-        wx.Frame.__init__(self, wx.GetApp().TopWindow, title='Save New Data', size=(400, 300))
-        bpanel = wx.Panel(self, -1)
-        tbox = wx.BoxSizer(wx.HORIZONTAL)
-        bbox = wx.BoxSizer(wx.HORIZONTAL)
-        box = wx.BoxSizer(wx.VERTICAL)
-
-        self.browser = wx.GenericDirCtrl(bpanel, 0, size=(250, 200))
-        tbox.Add(self.browser, 1, wx.ALL, 10)
-
-        bbox.Add(wx.Button(bpanel, 1, 'Save'), 0)
-        bbox.Add(wx.Button(bpanel, 2, 'Close'), 0)
-        box.Add(tbox)
-        box.Add(bbox, 1, wx.LEFT, 10)
-
-        bpanel.SetSizer(box)
-
-        self.Bind(wx.EVT_BUTTON, self.Save, id=1)
-        self.Bind(wx.EVT_BUTTON, self.close, id=2)
-
-        self.path = ''
-
-    def Save(self, event):
-        self.path = self.browser.GetFilePath()
-        try:
-            with open(self.path, 'wb') as test_file:
+    def save(self, event):        
+        def savefile(path, data):
+            with open(path, 'wb') as test_file:
 
                 writer = csv.writer(test_file, delimiter=',')
 
-                for row in zip(*self.WriteData.T):
+                for row in zip(*data.T):
                     writer.writerow(row)
-                wx.MessageBox('Saved', 'Data Save', wx.OK | wx.ICON_INFORMATION)
-                self.Close()
-        except:
-            wx.MessageBox('Permission Denied', 'Error', wx.OK)
+                wx.MessageBox('Saved', 'Data Save', wx.OK | wx.ICON_INFORMATION)      
+
+        Pi_interface.calculate_pi_vals(self)
+
+        if Pi_interface.pi_val_matrix != []:
+            heading_group = []
+
+            dialog = wx.FileDialog(self, message='Select file to import', defaultFile=Pi_interface.Filepath, style=wx.SAVE)
+            if dialog.ShowModal() == wx.ID_OK:
+                if dialog.GetPath().endswith('.csv'):
+                    saveFilepath = dialog.GetPath()
+                else:
+                    saveFilepath = dialog.GetPath() + '.csv'
+            dialog.Destroy()
+            print saveFilepath
+
+            for i in range(8, Pi_interface.values.GetNumberCols()):
+                heading_group.append('Pi Group ' + str(i-7))
+
+            combined_new_set = np.vstack((heading_group, Pi_interface.pi_val_matrix))
+
+            
+            WriteData = np.hstack((Pi_interface.Data, combined_new_set))
+            
+            savefile(saveFilepath, WriteData)
+            dialog.Destroy()
+        else:
+            wx.MessageBox('Nothing to save!', 'Error', wx.OK)
 
     def close(self, event):
         self.Close()
-
-    def read_in(self):
-
-        Pi_interface.reset(self, self.reset)
-        datashape = Pi_interface.Data.shape
-
-        var_name_matrix = Pi_interface.Data[0, :]
-        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1:8, 1:], dtype='f')
-
-        Pi_interface.updating_columns = True
-        Pi_interface.values.InsertRows(0, datashape[1]-1)
-        Pi_interface.updating_columns = False
-        Pi_interface.read_only(self)
-
-        for row in range(1, datashape[1]):
-            Pi_interface.values.SetCellValue(row-1, 0, var_name_matrix[row])
-            for col in range(1, datashape[0]):
-                Pi_interface.values.SetCellValue(row-1, col, '0')
-
-        Pi_interface.OnCellChange(self, self.OnCellChange)
-
 
 class Plotwindow(Pi_interface,  wx.Frame):
     h_label = ''
