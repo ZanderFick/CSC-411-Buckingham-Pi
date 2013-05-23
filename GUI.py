@@ -38,12 +38,16 @@ class Pi_interface(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, size=(800, 700))
         self.parent = parent
         Pi_interface.updating_columns = False
+        self.case = True
 
         self.initialize()
 
     def initialize(self):
+        Sizer = wx.BoxSizer(wx.VERTICAL)
+        Mainsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        panel = wx.Panel(self, 1, (10, 20), style=wx.SUNKEN_BORDER)
+        buttonsizer = wx.BoxSizer(wx.VERTICAL)
+        righthandsizer = wx.BoxSizer(wx.VERTICAL)
 
         menu = wx.MenuBar()
         filemenu = wx.Menu()
@@ -62,23 +66,44 @@ class Pi_interface(wx.Frame):
         self.Bind(wx.EVT_MENU, self.reset, filereset)
         self.Bind(wx.EVT_MENU, self.quit, filequit)
 
-        self.Button_permute = wx.Button(panel, -1, "Permute Pi Groups", (605, 30))
-        self.Button_plot = wx.Button(panel, -1, "Plot relations", (605, 300))
+        self.Button_permute = wx.Button(self, -1, "Permute Pi Groups")
+        self.Button_plot = wx.Button(self, -1, "Plot relations")
 
         ColLabels = ["Name", "L", "T", "M", u"\u03F4", "N", "I", "J"]
 
         Ncols = len(ColLabels)
         Nrows_initial = 1
 
-        Pi_interface.values = gridlib.Grid(panel)
+        Pi_interface.values = gridlib.Grid(self)
+
         Pi_interface.values.CreateGrid(Nrows_initial, Ncols)
-        Pi_interface.values.SetSize((600, 300))
+
+        self.Feedback = wx.Panel(self, -1, style=wx.BORDER)
+        self.Feedbacktext = wx.StaticText(self.Feedback, label='Welcome!')
+
+        self.SetBackgroundColour((230, 230, 230))
+# Sizing
+
+        Mainsizer.Add(Pi_interface.values, 1, wx.EXPAND)
+
+        buttonsizer.Add(self.Button_permute, 1, wx.EXPAND)
+        buttonsizer.Add(self.Button_plot, 1, wx.EXPAND)
+
+        righthandsizer.Add(buttonsizer, 0.5, wx.EXPAND)
+
+        Mainsizer.Add(righthandsizer, 0.5, wx.EXPAND | wx.ALIGN_CENTER_HORIZONTAL)
+
+        Sizer.Add(Mainsizer, 1, wx.EXPAND)
+        Sizer.Add(self.Feedback, 0.5, wx.EXPAND | wx.ALL)
 
         Pi_interface.values.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange,)
         Pi_interface.values.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.checkplot)
 
         self.Button_permute.Bind(wx.EVT_BUTTON, self.permute)
         self.Button_plot.Bind(wx.EVT_BUTTON, self.plot)
+
+        self.SetSizer(Sizer)
+        self.Center()
 
         for column, name in enumerate(ColLabels):
             Pi_interface.values.SetColLabelValue(column, name)
@@ -109,7 +134,11 @@ class Pi_interface(wx.Frame):
             for update_row in range(0, rcount):
                 val = Pi_interface.values.GetCellValue(update_row, update_col)
                 if val != '':
-                    self.input_mat[update_col-1, update_row] = val
+                    try:
+                        self.input_mat[update_col-1, update_row] = val
+                    except:
+                        Pi_interface.changecell(self, update_row, update_col)
+
         if Nrows > 1:
             self.input_fixed = self.input_mat[self.input_mat.any(1)].T
             self.Result = PI.buck(self.input_fixed)
@@ -169,6 +198,7 @@ class Pi_interface(wx.Frame):
             for rowupdate in range(0, Nrows):
                 col = (255, 130, 0)
                 Pi_interface.values.SetCellBackgroundColour(rowupdate, colupdate, col)
+
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
         Pi_interface.updating_columns = False
@@ -193,7 +223,7 @@ class Pi_interface(wx.Frame):
                     new_group += rand*new
 
                     neg_test = 0
-                
+
                     for count in range(0, res_shape[0]):
                         if new_group[count] != 0:
                             neg_test += new_group[count]/np.abs(new_group[count])
@@ -283,12 +313,15 @@ class Pi_interface(wx.Frame):
             self.PopupMenu(menu)
             menu.Destroy()
 
+    def changecell(self, row, col):
+        Pi_interface.values.SetCellValue(row, col, '0')
+
     def x_select(self, event):
 
         if Pi_interface.plot_x != []:
 
             if Pi_interface.plot_x[0] == -1:
-                Pi_interface.values.SetColLabelValue(Pi_interface.plot_x[1], self.labelplaceholder_x)
+                Pi_interface.values.SetColLabelValue(Pi_interface.plot_x[1], u'\u03A0%g' % (Pi_interface.plot_x[1]-7))
                 for row in range(0,  self.dim[1]):
                     if Pi_interface.plot_x[1] <= 7:
                         oldcolour = (255, 255, 255)
@@ -298,7 +331,7 @@ class Pi_interface(wx.Frame):
                         oldcolour = (70, 140, 255)
                     Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_x[1], oldcolour)
             else:
-                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_x[0], self.labelplaceholder_x)
+                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_x[0], str(Pi_interface.plot_x[0]+1))
                 for col in range(0,  self.dim[0]):
                     if col <= 7:
                         oldcolour = (255, 255, 255)
@@ -319,12 +352,10 @@ class Pi_interface(wx.Frame):
         colournew = (225, 255, 200)
 
         if self.choice[0] == -1:
-            self.labelplaceholder_x = Pi_interface.values.GetColLabelValue(self.choice[1])
             Pi_interface.values.SetColLabelValue(self.choice[1], 'X')
             for row in range(0,  self.dim[1]):
                 Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)
         else:
-            self.labelplaceholder_x = Pi_interface.values.GetRowLabelValue(self.choice[0])
             Pi_interface.values.SetRowLabelValue(self.choice[0], 'X')
             for col in range(0,  self.dim[0]):
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew)
@@ -339,7 +370,7 @@ class Pi_interface(wx.Frame):
         if Pi_interface.plot_y != []:
 
             if Pi_interface.plot_y[0] == -1:
-                Pi_interface.values.SetColLabelValue(Pi_interface.plot_y[1], self.labelplaceholder_y)
+                Pi_interface.values.SetColLabelValue(Pi_interface.plot_y[1],  u'\u03A0%g' % (Pi_interface.plot_y[1]-7))
                 for row in range(0,  self.dim[1]):
                     if Pi_interface.plot_y[1] <= 7:
                         oldcolour = (255, 255, 255)
@@ -349,7 +380,7 @@ class Pi_interface(wx.Frame):
                         oldcolour = (70, 140, 255)
                     Pi_interface.values.SetCellBackgroundColour(row, Pi_interface.plot_y[1], oldcolour)
             else:
-                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_y[0], self.labelplaceholder_y)
+                Pi_interface.values.SetRowLabelValue(Pi_interface.plot_y[0], str(Pi_interface.plot_y[0]+1))
                 for col in range(0,  self.dim[0]):
                     if col <= 7:
                         oldcolour = (255, 255, 255)
@@ -370,12 +401,10 @@ class Pi_interface(wx.Frame):
         colournew = (255, 200, 225)
 
         if self.choice[0] == -1:
-            self.labelplaceholder_y = Pi_interface.values.GetColLabelValue(self.choice[1])
             Pi_interface.values.SetColLabelValue(self.choice[1], 'Y')
             for row in range(0,  self.dim[1]):
                 Pi_interface.values.SetCellBackgroundColour(row, self.choice[1], colournew)
         else:
-            self.labelplaceholder_y = Pi_interface.values.GetRowLabelValue(self.choice[0])
             Pi_interface.values.SetRowLabelValue(self.choice[0], 'Y')
             for col in range(0,  self.dim[0]):
                 Pi_interface.values.SetCellBackgroundColour(self.choice[0], col, colournew)
@@ -387,7 +416,7 @@ class Pi_interface(wx.Frame):
 
     def import_data(self, event):
 
-        dialog =wx.FileDialog(self, message='Select file to import', defaultFile='', style=wx.OPEN | wx.CHANGE_DIR)
+        dialog = wx.FileDialog(self, message='Select file to import', defaultFile='', style=wx.OPEN | wx.CHANGE_DIR)
         if dialog.ShowModal() == wx.ID_OK:
             Pi_interface.Filepath = dialog.GetPath()
         dialog.Destroy()
@@ -404,7 +433,7 @@ class Pi_interface(wx.Frame):
                         filedata = np.vstack((filedata, row))
 
                 Pi_interface.Data = filedata
-                Pi_interface.read_in(self) 
+                Pi_interface.read_in(self)
 
     def plot(self, event):
 
@@ -452,7 +481,7 @@ class Pi_interface(wx.Frame):
 
                     new_val = 1
                     for val_iter in range(0, dim[1]):
-                        if exp[val_iter] != 0  or pi[val_iter] != -1 :
+                        if exp[val_iter] != 0 or pi[val_iter] != -1:
                             new_val = np.round(new_val*((np.abs(exp[val_iter]))**pi[val_iter]), 6)
                     add[exp_iter, pi_iter] = new_val
 
@@ -465,8 +494,21 @@ class Pi_interface(wx.Frame):
 
         self.input_mat = []
         self.input_fixed = []
-        self.Result = []
         self.Permute_Result = []
+
+        if self.case:
+            Pi_interface.Data = []
+
+            Pi_interface.var_val_matrix = []
+            Pi_interface.pi_val_matrix = []
+
+            Pi_interface.Filepath = ''
+            Pi_interface.dataset = []  
+
+        Pi_interface.plot_x = []
+        Pi_interface.x_name = ''
+        Pi_interface.plot_y = []
+        Pi_interface.y_name = ''
 
         if Nrows > 1:
             Pi_interface.updating_columns = True
@@ -478,6 +520,13 @@ class Pi_interface(wx.Frame):
             Pi_interface.values.DeleteCols(8, Ncols-8)
             Pi_interface.updating_columns = False
             Pi_interface.read_only(self)
+
+        for r in range(0, Nrows):
+            Pi_interface.values.SetRowLabelValue(r, str(r + 1))
+            for c in range(0, Ncols):
+                Pi_interface.values.SetCellBackgroundColour(r, c, (255, 255, 255))
+
+        Pi_interface.OnCellChange(self, self.OnCellChange)
 
     def read_only(self):
         Nrows = Pi_interface.values.GetNumberRows()
@@ -492,29 +541,33 @@ class Pi_interface(wx.Frame):
 
 
     def read_in(self):
+        try:
+            self.case = False
+            Pi_interface.reset(self, self.reset)
+            self.case = True
+            datashape = Pi_interface.Data.shape
 
-        Pi_interface.reset(self, self.reset)
-        datashape = Pi_interface.Data.shape
+            var_name_matrix = Pi_interface.Data[0, :]
 
-        var_name_matrix = Pi_interface.Data[0, :]
+            Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1::, :], dtype='f')
 
-        Pi_interface.var_val_matrix = np.array(Pi_interface.Data[1::, :], dtype='f')
+            Pi_interface.updating_columns = True
+            Pi_interface.values.InsertRows(0, datashape[1])
+            Pi_interface.updating_columns = False
+            Pi_interface.read_only(self)
 
+            for row in range(0, datashape[1]):
+                Pi_interface.values.SetCellValue(row, 0, var_name_matrix[row])
+                for col in range(1, 8):
+                    Pi_interface.values.SetCellValue(row, col, '0')
+            self.Feedbacktext.SetLabel(Pi_interface.Filepath + ' Loaded')
+            wx.MessageBox(Pi_interface.Filepath + '\nLoaded', 'File Open', wx.OK)
 
-        Pi_interface.updating_columns = True
-        Pi_interface.values.InsertRows(0, datashape[1])
-        Pi_interface.updating_columns = False
-        Pi_interface.read_only(self)
+            Pi_interface.OnCellChange(self, self.OnCellChange)
+        except:
+            wx.MessageBox('The file at\n' + Pi_interface.Filepath + '\nDoes not contain any data or is not of the correct .CSV datatype', 'File Open', wx.OK)
 
-        for row in range(0, datashape[1]):
-            Pi_interface.values.SetCellValue(row, 0, var_name_matrix[row])
-            for col in range(1, 8):
-                Pi_interface.values.SetCellValue(row, col, '0')
-
-        Pi_interface.OnCellChange(self, self.OnCellChange)
-
-
-    def save(self, event):        
+    def save(self, event):
         def savefile(path, data):
             with open(path, 'wb') as test_file:
 
@@ -522,7 +575,7 @@ class Pi_interface(wx.Frame):
 
                 for row in zip(*data.T):
                     writer.writerow(row)
-                wx.MessageBox('Saved', 'Data Save', wx.OK | wx.ICON_INFORMATION)      
+                wx.MessageBox('Saved', 'Data Save', wx.OK | wx.ICON_INFORMATION)
 
         Pi_interface.calculate_pi_vals(self)
 
@@ -536,16 +589,14 @@ class Pi_interface(wx.Frame):
                 else:
                     saveFilepath = dialog.GetPath() + '.csv'
             dialog.Destroy()
-            print saveFilepath
 
             for i in range(8, Pi_interface.values.GetNumberCols()):
                 heading_group.append('Pi Group ' + str(i-7))
 
             combined_new_set = np.vstack((heading_group, Pi_interface.pi_val_matrix))
 
-            
             WriteData = np.hstack((Pi_interface.Data, combined_new_set))
-            
+
             savefile(saveFilepath, WriteData)
             dialog.Destroy()
         else:
@@ -554,10 +605,14 @@ class Pi_interface(wx.Frame):
     def close(self, event):
         self.Close()
 
+
 class Plotwindow(Pi_interface,  wx.Frame):
     h_label = ''
 
     def __init__(self):
+        def slech():
+            print 'wooh'
+
         wx.Frame.__init__(self, None, wx.ID_ANY, Plotwindow.h_label)
 
         panel = wx.Panel(self, wx.ID_ANY)
@@ -570,8 +625,9 @@ class Plotwindow(Pi_interface,  wx.Frame):
         self.canvas.Draw(PlotGraphics([Pi_interface.dataset], name, Pi_interface.x_name, Pi_interface.y_name))
 
         sizer.Add(self.canvas, 1, wx.EXPAND)
-        
+
         panel.SetSizer(sizer)
+
 
 if __name__ == "__main__":
     app = wx.App()
