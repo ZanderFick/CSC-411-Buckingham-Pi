@@ -232,7 +232,13 @@ class Pi_interface(wx.Frame):
 
                     if neg_test < 0:
                         new_group[new_group.any(1)] = new_group[new_group.any(1)]/-1
-
+                    try:
+                        div_mask = new_group[abs(new_group) > 0.1]
+                        div =  min(abs(div_mask))
+                        if div != 0:
+                            new_group[new_group.any(1)] = new_group[new_group.any(1)]/div
+                    except:
+                        new_group[new_group.any(1)] = new_group[new_group.any(1)]
                     results = Ncols - 8
 
                     uniqueness = np.zeros([results, 1])

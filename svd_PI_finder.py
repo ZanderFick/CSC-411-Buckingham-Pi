@@ -29,9 +29,11 @@ def buck(input_matrix, eps=1e-14):
                     null_space[r, c] = 0    
             if neg_test < 0:
                 null_space[r, :] = null_space[r, :]/-1
-            div_mask = null_space[r ,abs(null_space[r, :]) > 0.1]
+            group =  null_space[r, :]   
+            div_mask = group[abs(group) > 0.01]
+            print div_mask
             div = min(abs(div_mask))
-            
-            null_space[r, :] = null_space[r, :]/div
+            if div != 0:
+                null_space[r, :] = null_space[r, :]/div
 
         return null_space.T
