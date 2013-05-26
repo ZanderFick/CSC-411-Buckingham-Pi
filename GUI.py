@@ -617,7 +617,6 @@ class Plotwindow(Pi_interface,  wx.Frame):
 
     def __init__(self):
         def slech():
-            print 'wooh'
 
         wx.Frame.__init__(self, None, wx.ID_ANY, Plotwindow.h_label)
 

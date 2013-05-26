@@ -31,7 +31,6 @@ def buck(input_matrix, eps=1e-14):
                 null_space[r, :] = null_space[r, :]/-1
             group =  null_space[r, :]   
             div_mask = group[abs(group) > 0.01]
-            print div_mask
             div = min(abs(div_mask))
             if div != 0:
                 null_space[r, :] = null_space[r, :]/div
