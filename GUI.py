@@ -616,8 +616,6 @@ class Plotwindow(Pi_interface,  wx.Frame):
     h_label = ''
 
     def __init__(self):
-        def slech():
-
         wx.Frame.__init__(self, None, wx.ID_ANY, Plotwindow.h_label)
 
         panel = wx.Panel(self, wx.ID_ANY)
