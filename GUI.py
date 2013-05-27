@@ -448,7 +448,7 @@ class Pi_interface(wx.Frame):
 
     def plot(self, event):
 
-        if Pi_interface.Data != []:
+        if Pi_interface.Data != [] and Pi_interface.plot_x != [] and Pi_interface.plot_y != [] :
 
             x_set = Pi_interface.plot_x
             y_set = Pi_interface.plot_y
@@ -475,6 +475,8 @@ class Pi_interface(wx.Frame):
                 Pi_interface.dataset = PolyMarker(points, colour='black',  marker='triangle', size=1)
 
                 Plotwindow().Show()
+        else:
+             wx.MessageBox('Please select a X and Y axis variable by right clicking the Row or Column label of the desired variable', 'Choose axes', wx.OK)
 
     def calculate_pi_vals(self):
         if self.Result != None:
