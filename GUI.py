@@ -75,6 +75,9 @@ class Pi_interface(wx.Frame):
         Nrows_initial = 1
 
         Pi_interface.values = gridlib.Grid(self)
+        
+        #self.a = gridlib.Grid(self)
+        #self.a.GetPosition()
 
         Pi_interface.values.CreateGrid(Nrows_initial, Ncols)
 
@@ -218,7 +221,11 @@ class Pi_interface(wx.Frame):
             Wait = 1000
             while not New_Group_found and Wait > 0:
                 for iter_r in range(0, res_shape[1]):
-                    rand = np.random.randint(-1, 1)
+                    random = np.random.randint(0, 1)
+                    if random == 0:
+                        rand = np.random.randint(-1, 1)
+                    else:
+                        rand = 1/max(new_group.any(1))
                     new = np.matrix(self.Result[:, iter_r]).T
                     new_group += rand*new
 
@@ -520,12 +527,10 @@ class Pi_interface(wx.Frame):
             Pi_interface.updating_columns = True
             Pi_interface.values.DeleteRows(0, Nrows-1)
             Pi_interface.updating_columns = False
-            Pi_interface.read_only(self)
         if Ncols > 8:
             Pi_interface.updating_columns = True
             Pi_interface.values.DeleteCols(8, Ncols-8)
             Pi_interface.updating_columns = False
-            Pi_interface.read_only(self)
 
         for r in range(0, Nrows):
             Pi_interface.values.SetRowLabelValue(r, str(r + 1))
