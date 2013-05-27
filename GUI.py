@@ -75,9 +75,6 @@ class Pi_interface(wx.Frame):
         Nrows_initial = 1
 
         Pi_interface.values = gridlib.Grid(self)
-        
-        #self.a = gridlib.Grid(self)
-        #self.a.GetPosition()
 
         Pi_interface.values.CreateGrid(Nrows_initial, Ncols)
 
