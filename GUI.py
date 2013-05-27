@@ -189,18 +189,19 @@ class Pi_interface(wx.Frame):
             Pi_interface.updating_columns = False
             Pi_interface.read_only(self)
 
-        for resR in range(0, res_rows):
-            for colR in range(0, res_cols):
-                val = "%g" % round(self.Result[resR, colR], 2)
-                Pi_interface.values.SetCellValue(resR, colR+8, val)
+        if self.Result is not None:
+            for resR in range(0, res_rows):
+                for colR in range(0, res_cols):
+                    val = "%g" % round(self.Result[resR, colR], 2)
+                    Pi_interface.values.SetCellValue(resR, colR+8, val)
 
-        for colup in range(0, res_cols):
-            colupdate = colup + 8
-            name = u'\u03A0%g' % (colup + 1)
-            Pi_interface.values.SetColLabelValue(colupdate, name)
-            for rowupdate in range(0, Nrows):
-                col = (255, 130, 0)
-                Pi_interface.values.SetCellBackgroundColour(rowupdate, colupdate, col)
+            for colup in range(0, res_cols):
+                colupdate = colup + 8
+                name = u'\u03A0%g' % (colup + 1)
+                Pi_interface.values.SetColLabelValue(colupdate, name)
+                for rowupdate in range(0, Nrows):
+                    col = (255, 130, 0)
+                    Pi_interface.values.SetCellBackgroundColour(rowupdate, colupdate, col)
 
         Pi_interface.updating_columns = True
         Pi_interface.values.AutoSizeColumns()
@@ -516,7 +517,8 @@ class Pi_interface(wx.Frame):
             Pi_interface.pi_val_matrix = []
 
             Pi_interface.Filepath = ''
-            Pi_interface.dataset = []  
+            Pi_interface.dataset = [] 
+            self.Result = None
 
         Pi_interface.plot_x = []
         Pi_interface.x_name = ''
